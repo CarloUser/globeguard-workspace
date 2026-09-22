@@ -1,0 +1,21 @@
+# The two application repositories keep their own history and their own remotes.
+/globeguard-backend/
+/globeguard-frontend/
+
+# Portable PostgreSQL 16 plus its data directory (~1 GB), see .tools/README.md.
+/.tools/
+
+# Real values. .env.example is the tracked template.
+.env
+
+# Business reference files. Deliberately not versioned: the Bexio export in here is a
+# customer address list, and the price sheets are the owner's working masters. The
+# catalogue build script reads them from this path on the machine that has them.
+/reference/
+
+# Captured tool output and run logs. Regenerable, sometimes large, occasionally noisy.
+/docs/*.log
+/docs/*.out
+/docs/*.err
+/docs/*.bak
+/backups/

@@ -1,0 +1,567 @@
+
+########## navil-backend-config — FINDINGS ##########
+--- undecided (8) ---
+ * Invoice payment handler + eligibility checkers | src/plugins/payments/invoice-payment.handler.ts | small | Business logic (B2B pay-by-invoice) may be wanted alongside Mollie; the sv descriptions and the Swedish group-name dependency must be replaced. Owner decision.
+ * Customer classification by Swedish group names | src/plugins/shared/customer-classification.ts | small | B2B/B2C gating hinges on a CustomerGroup literally named 'Företag'. Owner must pick the GlobeGuard mechanism (German group names, or a customer custom field / Bexio contact_type). The frontend uses activeCustomerClassification; keep the query, change the source.
+ * Order code strategy | src/config/order-code-strategy.ts | trivial | 'SE' is the Sweden/Drivknuten prefix and the 5-digit space caps at 100,000 orders. Keep the collision-safe strategy, but the prefix/length is an owner decision (affects Bexio round-trip and customer-facing numbers).
+ * Hetzner konsoleH supervisor | deploy/app.js | small | GlobeGuard-authored (commits c988011/148478a/0b5a5b3, 2026-07-06) but tied to the konsoleH beta and to the NAVIL Pages-router frontend layout (~/globeguard/frontend, next start). Whether the merged stack keeps konsoleH, Docker, or the pm2 flow is an owner decision. Hardcoded beta URL must become env.
+ * GitHub Actions deploy workflow | .github/workflows/deploy.yml | small | Does NOT reference Drivknuten or Bilregistret by name (host is a secret) but contradicts the documented Hetzner topology (user drivkf, ~/globeguard, app.js supervisor, no pm2, no git checkout on server — PROJECT-CONTEXT.md:206-228). Default user 'register' and the third-party authorship suggest a different server. Runs a destructive git reset --hard on every push to main. Owner must confirm which 
+ * Beta asset sync (public-API pull, older) | scripts/sync-assets-from-beta.mjs | trivial | Superseded by scripts/sync-product-assets.mjs (env-driven, correct /admin-api and /shop-api paths, npm script sync:product-assets). Recommend drop; listed undecided because it is GlobeGuard-authored, not Drivknuten.
+ * Repo tooling configs inherited from the Vendure monorepo | .eslintrc.js | trivial | Generic Vendure-monorepo leftovers, not Drivknuten-specific; harmless but mostly inapplicable. Replace with a minimal eslint/prettier setup matching the actual 2-space style, or keep.
+ * Car lookup plugin (Swedish registration API) | src/plugins/car-lookup/ | small | Outside my primary scope but its env vars are. Nothing in the GlobeGuard picker (vehicle type -> brand -> year) needs a registration lookup; leaning drop-drivknuten, owner to confirm (PROJECT-CONTEXT.md:467 notes the frontend /carResolve call is already broken).
+--- drop-drivknuten (3) ---
+ * ABS-ring duplicate merge script | scripts/merge-duplicate-abs-ring-products.mjs | trivial
+ * ABS-ring weight normaliser | scripts/normalize-abs-ring-weights.mjs | trivial
+ * todo file (Fortnox automation notes) | todo | trivial
+--- drop-replaced-by-mollie (3) ---
+ * KUSTOM_* env typings block | src/environment.d.ts | trivial
+ * Kustom (ex-Klarna) checkout plugin directory | src/plugins/kustom/ | trivial
+ * Payment plugin placeholder methods (sumup, paypal) | src/plugins/payments/payment.plugin.ts | small
+--- port-logic-rebuild-ui (1) ---
+ * Shipping configuration helpers (Swedish leftovers) | src/plugins/shipping/shipping-configuration.ts | trivial
+--- port-copy-only (1) ---
+ * README.md | README.md | trivial
+--- keep-as-is (33) ---
+ * vendure-config.ts — plugin registration and core options | src/vendure-config.ts | small
+ * Auth configuration | src/vendure-config.ts | trivial
+ * API paths, dashboard, asset server, ports | src/vendure-config.ts | trivial
+ * Server / worker / migrate entrypoints | src/index.ts | trivial
+ * environment.d.ts typings | src/environment.d.ts | trivial
+ * Shipping plugin — Swiss method set | src/plugins/shipping/shipping.plugin.ts | trivial
+ * Customer/address name sanitizer subscribers | src/config/db/subscribers/ | trivial
+ * Asset strategies (naming, preview sanitising, prefixed S3) | src/config/assets/ | trivial
+ * LocaleAwareTemplateLoader | src/lib/locale-aware-template-loader.ts | trivial
+ * SendgridEmailSender | src/lib/sendgrid-email-sender.ts | trivial
+ * Email templates (4 events x de/en + shared partials) | static/email/templates/ | small
+ * Dashboard user-settings override (Swedish defaults) | src/dashboard-overrides/user-settings.tsx | trivial
+ * mime-types ambient typing | src/types/mime-types.d.ts | trivial
+ * Product image importer | src/import-product-images.ts | trivial
+ * package.json scripts and dependencies | package.json | small
+ * tsconfig.json / tsconfig.dashboard.json | tsconfig.json | trivial
+ * vite.config.mts (dashboard build + fork overlay) | vite.config.mts | trivial
+ * lingui.dashboard.config.mjs | lingui.dashboard.config.mjs | trivial
+ * docker-compose.yml (dev deps helper) | docker-compose.yml | trivial
+ * Dockerfile + .dockerignore | Dockerfile | trivial
+ * Beta env template | deploy/backend.env.example | trivial
+ * Catalog build pipeline script | scripts/build-catalog-and-compatibility.js | trivial
+ * Excel inspector script | scripts/inspect-compatibility-excel.js | trivial
+ * Managed runtime wrapper (npm dev / npm start) | scripts/with-managed-redis.mjs | trivial
+ * Redis runtime helper | scripts/redis-runtime.mjs | trivial
+ * Postgres runtime helper | scripts/postgres-runtime.mjs | trivial
+ * Print runtime helper (CUPS + Tailscale installer) | scripts/print-runtime.mjs | trivial
+ * Product asset sync (env-driven) | scripts/sync-product-assets.mjs | trivial
+ * CLAUDE.md | CLAUDE.md | trivial
+ * HANDOFF.md | HANDOFF.md | trivial
+ * PROJECT-CONTEXT.md | PROJECT-CONTEXT.md | trivial
+ * Generated catalog data files | data/ | trivial
+ * Claude/Cursor project rules and skills | .claude/ | trivial
+
+########## navil-backend-domain-plugins — FINDINGS ##########
+--- undecided (1) ---
+ * PaymentPlugin — 'sumup' and 'paypal' placeholder methods | src/plugins/payments/payment.plugin.ts | small | Owner decision needed: with Mollie as the official PSP (Mollie itself offers cards + PayPal), these two methods are almost certainly redundant and DANGEROUS if left in — a customer selecting 'SumUp' or 'PayPal' gets an Authorized offline invoice payment with no money collected. Recommend dropping both when MolliePlugin lands; if SumUp is wanted as a POS/terminal rail, it needs a real handler. Beca
+--- drop-replaced-by-mollie (8) ---
+ * KustomPlugin module (unregistered Klarna/Kustom checkout) | src/plugins/kustom/kustom.plugin.ts | trivial
+ * Kustom payment handler | src/plugins/kustom/kustom-payment.handler.ts | trivial
+ * Kustom API service (Klarna Checkout v3 / ordermanagement v1 REST client) | src/plugins/kustom/kustom.service.ts | trivial
+ * Kustom REST controller (create-session / complete-payment / push webhook) | src/plugins/kustom/kustom.controller.ts | trivial
+ * Kustom types/constants | src/plugins/kustom/types.ts | trivial
+ * KUSTOM_* env typings | src/environment.d.ts | trivial
+ * KUSTOM_FRONTEND_BASE_URL fallback in vendure-config | src/vendure-config.ts | trivial
+ * Kustom/Klarna mentions in docs | CLAUDE.md | trivial
+--- keep-as-is (27) ---
+ * CatalogPlugin module (registers custom fields + seeder) | src/plugins/catalog/catalog.plugin.ts | trivial
+ * Catalog custom field definitions (7 fields) | src/plugins/catalog/custom-fields.ts | trivial
+ * TS module augmentation for catalog custom fields | src/plugins/catalog/custom-entity-fields-augmentation.ts | trivial
+ * CatalogSeederService — tax bootstrap, product/variant upsert, retire pass, collection tree | src/plugins/catalog/services/catalog-seeder.service.ts | small
+ * data/product-catalog.csv (single-variant product master, 256 rows) | data/product-catalog.csv | trivial
+ * data/brand-compatibility.json (brand-group + SGW model) | data/brand-compatibility.json | small
+ * data/extras.json (multi-variant products: 3 SGW licences + Ferndiagnose) | data/extras.json | trivial
+ * data/brand-use-cases.json (per-brand 'Typische Einsatzgebiete' paragraphs) | data/brand-use-cases.json | trivial
+ * data/cable-descriptions.json (per-SKU cable copy) | data/cable-descriptions.json | trivial
+ * scripts/build-catalog-and-compatibility.js (catalog generator from owner Excels) | scripts/build-catalog-and-compatibility.js | small
+ * Invoice (offline) payment handler | src/plugins/payments/invoice-payment.handler.ts | trivial
+ * Payment eligibility checkers (always / company-only) | src/plugins/payments/payment-configuration.ts | trivial
+ * PaymentPlugin — 'invoice' method bootstrap | src/plugins/payments/payment.plugin.ts | trivial
+ * ShippingPlugin — 5 Swiss/German shipping methods bootstrap | src/plugins/shipping/shipping.plugin.ts | small
+ * Shipping eligibility checkers + dead Swedish sort helpers | src/plugins/shipping/shipping-configuration.ts | small
+ * Shop API query activeCustomerClassification | src/plugins/shipping/api/api-extensions.ts | trivial
+ * shared/customer-classification — Privat vs Företag CustomerGroup classifier | src/plugins/shared/customer-classification.ts | small
+ * BexioPlugin module | src/plugins/bexio/bexio.plugin.ts | trivial
+ * Bexio entities (BexioConnection, BexioSyncEvent) | src/plugins/bexio/entities/bexio-connection.entity.ts | trivial
+ * Bexio custom fields on Customer and Order | src/plugins/bexio/custom-fields.ts | trivial
+ * Bexio permissions | src/plugins/bexio/bexio.permissions.ts | trivial
+ * Bexio OAuth callback controller | src/plugins/bexio/bexio.controller.ts | trivial
+ * Bexio admin GraphQL API | src/plugins/bexio/api/api-extensions.ts | trivial
+ * BexioService (OAuth + authenticated fetch) | src/plugins/bexio/services/bexio.service.ts | trivial
+ * Bexio Customer -> Contact sync | src/plugins/bexio/services/bexio-customer-sync.service.ts | trivial
+ * Bexio Order -> Invoice sync | src/plugins/bexio/services/bexio-order-sync.service.ts | trivial
+ * BexioSyncEventService + types | src/plugins/bexio/services/bexio-sync-event.service.ts | trivial
+
+########## navil-backend-content-plugins-and-dashboard — FINDINGS ##########
+--- undecided (6) ---
+ * SITE_FAQ_PAGE_DEFINITIONS page keys/paths (homepage, about-us, payment-methods, shipping-delivery, warranty, returns-refunds, privacy-policy, legal-information, contact-us, terms) | src/plugins/faq/faq.constants.ts | trivial | These must match the merged frontend's actual routes (German slugs planned per HANDOFF §8 item 6). Owner/orchestrator must supply the final page list; until then FAQ sections can only be attached to these keys.
+ * CUPS health indicator registered unconditionally -> /health returns 503 whenever no CUPS server is reachable | src/plugins/cups/services/cups.service.ts | trivial | Owner decision: (a) gate CupsPlugin registration on CUPS_SERVER_URL being set, (b) register the indicator only when configured, or (c) drop the indicator and keep only the dashboard status page. Any of a/b is a 5-line change; recommend (a) so Docker/Hetzner /health works out of the box.
+ * scripts/print-runtime.mjs (auto-installs cups-client/cups-bsd via apt/brew and Tailscale via curl|sh at npm start when CUPS_SERVER_URL is set) | scripts/print-runtime.mjs | trivial | Operationally aggressive (mutates host at process start). Keep only if the owner really runs CUPS from the app host; otherwise document manual install and drop the auto-bootstrap.
+ * packages/dashboard vendored copy of @vendure/dashboard 3.5.5 (full upstream source: src/app 218 files, src/lib 399 files, vite/, plugin/, e2e/, storybook config, 24 .po locales) | packages/dashboard/ | medium | Everything in packages/dashboard/src/app and src/lib that is not reached through the aliases (the whole lib IS reached; only the 7 aliased routes + their relative imports + index.tsx/embedded-orders-list.tsx are reached in app) is dead weight duplicating npm. Two viable strategies for the merged repo: (A) keep the overlay exactly as is (zero-risk, but pins Vendure to 3.5.5 — the NEW pair is on 3.7
+ * Customer detail overlay: Privat/Företag classification groups + customFields invoiceEmail/orderEmail/offerEmail/paymentTermsDays (20 days default for companies) | packages/dashboard/src/app/routes/_authenticated/_customers/customers_.$id.tsx | small | Fortnox-era B2B classification. Either drop the alias (upstream customer page) or redesign against GlobeGuard's actual B2B model (uid/vatNumber, B2C/B2B tier split per HANDOFF). Owner decision needed because HANDOFF mentions 'private/company customer-classification eligibility checkers' in the shipping plugin ('Privat' has 5 hits in src/, 'Företag' 0).
+ * Product-variant detail overlay (aliased but no GlobeGuard/Drivknuten markers found) | packages/dashboard/src/app/routes/_authenticated/_product-variants/product-variants_.$id.tsx | trivial | Cannot tell why it was forked without a byte diff against upstream 3.5.5 (node_modules absent). If slimming the fork, drop this alias first and see if anything regresses.
+--- drop-drivknuten (10) ---
+ * FAQ site-page definition 'drivlina' (/drivlina) | src/plugins/faq/faq.constants.ts | trivial
+ * FAQ admin owner path for BLOG sections uses Swedish '/blogg/' | src/plugins/faq/services/faq.service.ts | trivial
+ * CarLookupPlugin (REST controller + CarLookupService + CarLookupAPI.md) | src/plugins/car-lookup/ | small
+ * Swedish placeholder in blog featured-image alt field | packages/dashboard/src/extensions/blogs/blog-pages.tsx | trivial
+ * Blog admin API helper defaults new translations to languageCode 'sv' | packages/dashboard/src/extensions/blogs/blogs.api.ts | trivial
+ * Virtual-products dashboard feature and routes (list/detail pages, GraphQL docs, nav item under Catalog) | packages/dashboard/src/features/virtual-products/ + packages/dashboard/src/extensions/virtual-products-routes.tsx | trivial
+ * Order pages overlay: OrderLine customFields virtualProductId/virtualSku/virtualSlug/virtualName | packages/dashboard/src/app/routes/_authenticated/_orders/orders.graphql.ts + components/order-table.tsx | small
+ * Collections overlay: virtualProductCount / '{count} virtual products' / CollectionContentsTable of virtual products | packages/dashboard/src/app/routes/_authenticated/_collections/collections.graphql.ts, collections.tsx, components/collection-contents-table.tsx | small
+ * Product detail overlay: ProductFitmentTagsEditor + ProductVirtualSkusTable (+ productFitmentAdmin GraphQL docs) | packages/dashboard/src/app/routes/_authenticated/_products/products_.$id.tsx, components/product-fitment-tags-editor.tsx, components/product-virtual-skus-table.tsx | small
+ * User-settings provider override defaulting dashboard UI to Swedish/SE | src/dashboard-overrides/user-settings.tsx | trivial
+--- keep-as-is (18) ---
+ * BlogPlugin (entities Blog/BlogTranslation/BlogInlineAsset, BlogService, admin+shop resolvers) | src/plugins/blog/ | trivial
+ * BlogService.generateSlug strips all non-ASCII characters (German umlauts lost) | src/plugins/blog/services/blog.service.ts | trivial
+ * FaqPlugin (FaqSection entity, FaqService, admin+shop resolvers) | src/plugins/faq/ | small
+ * StoreLocatorPlugin (StoreLocation entity, service, admin+shop resolvers) | src/plugins/store-locator/ | trivial
+ * CupsPlugin (CupsConfiguration entity, CupsService, admin API, Tailscale connect) | src/plugins/cups/ | small
+ * Swedish-locale lpstat/lpq output regexes in CupsService | src/plugins/cups/services/cups.service.ts | trivial
+ * DashboardOverviewPlugin (KPI resolver) — also the dashboard-extension entry point | src/plugins/dashboard-overview/ | trivial
+ * Dashboard extension registry (routes, nav, page blocks) | packages/dashboard/src/i18n/dashboard-extension.ts | trivial
+ * Blog admin pages (list + detail with SEO checklist, SERP preview, tag chips, per-blog FAQ editor, webp/avif-only featured image) | packages/dashboard/src/extensions/blogs/blog-pages.tsx | trivial
+ * FAQ admin pages (sections list, upsert form with owner picker, collection search, items editor) | packages/dashboard/src/extensions/faqs/faq-pages.tsx | trivial
+ * CUPS admin pages (print server settings/status + Tailscale connect, print queue with auto-refresh) | packages/dashboard/src/extensions/cups/cups-pages.tsx | trivial
+ * Store locator admin pages (list with type filter, detail form with lat/lng, booking/details URLs) | packages/dashboard/src/extensions/store-locator/store-locator-pages.tsx | trivial
+ * Dashboard overview page + insights redirect block | packages/dashboard/src/app/routes/_authenticated/index.tsx | trivial
+ * Order detail Bexio invoice id display (hides bexioInvoiceId from generic custom-field UI, shows link line) | packages/dashboard/src/app/routes/_authenticated/_orders/components/order-detail-shared.tsx | trivial
+ * Collection detail FAQ section editor (CollectionFaqEditor page block) | packages/dashboard/src/app/routes/_authenticated/_collections/collections_.$id.tsx | trivial
+ * Blog nav section added to core dashboard nav defaults | packages/dashboard/src/lib/framework/defaults.ts | trivial
+ * Root dashboard build wiring (vite.config.mts theme + aliases, lingui.dashboard.config.mjs, sync:dashboard-i18n pre-step, tsconfig.dashboard.json) | vite.config.mts, lingui.dashboard.config.mjs, tsconfig.dashboard.json, package.json | trivial
+ * Dashboard locale catalogs (24 .po files) — German translations missing for all custom strings; store-locator strings never extracted | packages/dashboard/src/i18n/locales/de.po (+ en.po etc.) | medium
+
+########## navil-frontend-domain-logic — FINDINGS ##########
+--- undecided (1) ---
+ * cartDisplayTotals.ts — cart total breakdown | src/services/cartDisplayTotals.ts | small | Owner decision needed on what the cart shows before the delivery country is known (NET subtotal + 'zzgl. MwSt.' only, or estimated CH 8.1%). Recommended replacement: render Vendure's subTotal (net), taxSummary.taxTotal and shippingWithTax directly instead of back-computing.
+--- drop-drivknuten (9) ---
+ * productCategories.ts — Drivknuten category tree helpers | src/data/productCategories.ts | trivial
+ * product-category-products.ts — auto-part browse mapping | src/services/product-category-products.ts | trivial
+ * product-category-query.ts — /drivlina browse href + regNr | src/services/product-category-query.ts | trivial
+ * customerGroupClassification.ts — private/company shipping filter | src/services/customerGroupClassification.ts | trivial
+ * shipping-methods.ts — Swedish shipping-method sort priority | src/constants/shipping-methods.ts | trivial
+ * ProductCard.tsx — RedParts listing card | src/components/shared/ProductCard.tsx | trivial
+ * CompatibilityStatusBadge.tsx — vehicle fit badge from CarContext | src/components/shared/CompatibilityStatusBadge.tsx | trivial
+ * contexts/CarContext.tsx — active vehicle from Swedish lookup | src/contexts/CarContext.tsx | trivial
+ * contexts/GarageContext.tsx — saved vehicles by RegNr/WHEELID | src/contexts/GarageContext.tsx | trivial
+--- drop-replaced-by-mollie (2) ---
+ * shop-checkout.ts — Kustom session/prepare/complete + payment-code map | src/api/graphql/shop-checkout.ts | trivial
+ * pages/cart/checkout/index.tsx — /cart/checkout redirect stub | src/pages/cart/checkout/index.tsx | trivial
+--- replace-with-other-repo (2) ---
+ * contexts/AuthContext.tsx — auth facade over Redux user | src/contexts/AuthContext.tsx | small | NEW frontend has its own auth pages/account area; preserve the semantics 'accounts mandatory at checkout' and the same-site ?redirect= handling from login.tsx:49-55.
+ * account.api.ts graphqlClient — Apollo client, language link, auth link | src/api/graphql/account.api.ts | medium | NEW frontend's gql.tada client in src/lib/vendure replaces Apollo, but must reproduce: cookie session forwarding in server components/actions, languageCode per request, and (if the backend uses bearer sessions) the vendure-auth-token round-trip. Note NAVIL's stored token is the channel token; verify against the backend's tokenMethod before copying that behaviour.
+--- port-logic-rebuild-ui (26) ---
+ * VehicleTypeBadge.tsx — SKU -> vehicle-type icon overlay | src/components/globeguard/VehicleTypeBadge.tsx | small
+ * store/currency/* — Redux currency slice | src/store/currency/currencyReducer.ts | small
+ * CurrencyFormat.tsx — Rappen -> formatted price with rate | src/components/shared/CurrencyFormat.tsx | trivial
+ * ProductPriceValue.tsx — price + optional gross/net popup | src/components/shared/ProductPriceValue.tsx | trivial
+ * catalog.api.ts — tier products / collection listing on standard Shop API | src/api/graphql/catalog.api.ts | medium
+ * products.api.ts — product detail fetch | src/api/graphql/products.api.ts | small
+ * active-order.api.ts — cart operations + order->cart mapping | src/api/graphql/active-order.api.ts | medium
+ * shop-checkout.ts — checkoutWithVendure + invoice payment | src/api/graphql/shop-checkout.ts | medium
+ * product-search.api.ts — free-text search | src/api/graphql/product-search.api.ts | small
+ * cartActions.ts — Redux thunks incl. cartAddConfiguredItems | src/store/cart/cartActions.ts | medium
+ * TierPicker.tsx — vehicle type -> brand -> year (+2 PRO slots) | src/components/globeguard/TierPicker.tsx | medium
+ * ProductConfigurator.tsx — add-on plan builder (SGW, Erweiterung, Truma, ELITE Mixed, ELITE SGW) | src/components/globeguard/ProductConfigurator.tsx | large
+ * SgwRemoveConfirmDialog.tsx — SGW untick/remove confirmation | src/components/globeguard/SgwRemoveConfirmDialog.tsx | small
+ * pages/produkte/basic.tsx — BASIC finder page | src/pages/produkte/basic.tsx | small
+ * pages/produkte/womo.tsx — WoMo finder page | src/pages/produkte/womo.tsx | small
+ * pages/produkte/pro.tsx — PRO finder page | src/pages/produkte/pro.tsx | small
+ * pages/produkte/elite.tsx — ELITE device chooser | src/pages/produkte/elite.tsx | medium
+ * pages/produkte/kategorie/[slug].tsx — collection listing with child sections | src/pages/produkte/kategorie/[slug].tsx | small
+ * pages/products/[slug].tsx — product page route | src/pages/products/[slug].tsx | trivial
+ * ShopPageProduct.tsx — product page container (variant, configuration, live total, add-to-cart guards) | src/components/shop/ShopPageProduct.tsx | large
+ * pages/cart/index.tsx — cart page (account gate, SGW confirm, shipping/payment choice, routing to checkout) | src/pages/cart/index.tsx | large
+ * pages/cart/checkout/faktura.tsx — invoice (Rechnung) checkout | src/pages/cart/checkout/faktura.tsx | medium
+ * pages/cart/checkout/[token].tsx — order confirmation page | src/pages/cart/checkout/[token].tsx | small
+ * Dropcart.tsx — header mini-cart | src/components/header/Dropcart.tsx | small
+ * services/locale.ts — locale helpers | src/services/locale.ts | trivial
+ * PORT MANIFEST — rewrite list (logic preserved, UI/runtime replaced) | src/components/globeguard/ProductConfigurator.tsx | large
+--- port-copy-only (10) ---
+ * interfaces/product.ts — IProduct / IProductVariantInfo | src/interfaces/product.ts | small
+ * cartTypes.ts / cartActionTypes.ts / cartHooks.ts / cartReducer.ts | src/store/cart/cartTypes.ts | small
+ * TierPicker.module.scss + GlobeGuardPages.module.scss — brand styling | src/components/globeguard/GlobeGuardPages.module.scss | small
+ * pages/index.tsx — homepage (hero, B2C tier cards, B2B ELITE band) | src/pages/index.tsx | small
+ * pages/geraet-finden.tsx — device finder (BASIC / PRO / ELITE chooser) | src/pages/geraet-finden.tsx | small
+ * pages/produkte/index.tsx — products hub | src/pages/produkte/index.tsx | small
+ * contexts/ProductCategoriesContext.tsx — fixed GlobeGuard header menu | src/contexts/ProductCategoriesContext.tsx | trivial
+ * services/url.ts — route map | src/services/url.ts | trivial
+ * public/i18n/de.json + en.json — react-intl catalogues | public/i18n/de.json | small
+ * PORT MANIFEST — DE/EN copy objects to extract into next-intl (key counts) | src/components/globeguard/ProductConfigurator.tsx | medium
+--- keep-as-is (11) ---
+ * globeguard-picker.ts — picker/SGW/Erweiterung/ELITE domain module | src/services/globeguard-picker.ts | trivial
+ * brand-compatibility.json — brand-group/tier/SGW data (81 entries, 4 junk) | src/data/brand-compatibility.json | trivial
+ * brand-logos.json — logo mapping per brand group | src/data/brand-logos.json | trivial
+ * brand-use-cases.json — DE/EN 'Typische Einsatzgebiete' per brand | src/data/brand-use-cases.json | trivial
+ * shopCurrencies.ts — CHF default, EUR rate 1.1 display-only | src/data/shopCurrencies.ts | trivial
+ * shopLanguages.ts — de/en | src/data/shopLanguages.ts | trivial
+ * product-highlights.ts — product-page highlight bullets | src/services/product-highlights.ts | small
+ * vat-and-shipping.ts — VAT 8.1% + fallback shipping constants | src/constants/vat-and-shipping.ts | trivial
+ * completedOrderCache.ts — sessionStorage handoff of the placed order | src/services/completedOrderCache.ts | trivial
+ * utils/purchaseQuantities.ts — min/step/default quantity rules | src/utils/purchaseQuantities.ts | trivial
+ * PORT MANIFEST — verbatim copy list | src/services/globeguard-picker.ts | trivial
+
+########## navil-frontend-pages-and-remnants — FINDINGS ##########
+--- undecided (2) ---
+ * Route /cart/checkout/faktura — invoice ('Rechnung') checkout form for eligible customers | src/pages/cart/checkout/faktura.tsx | medium | Swedish slug 'faktura'. Whether a B2B invoice payment (outside Mollie) survives is an owner decision; TEXT_PAYMENT_KUSTOM_CAPTION promises 'Karte, Rechnung und TWINT'.
+ * public/Payment link images — 6 SVGs: Apple_Pay, Klarna, Mastercard, PayPal, Swish, Visa (only Mastercard/Visa/PayPal referenced, in ShopPageProduct) | public/Payment link images | trivial | Klarna and Swish are Swedish → drop. Which logos to show depends on the Mollie methods enabled (TWINT logo absent although copy promises TWINT). Folder name contains spaces.
+--- drop-drivknuten (36) ---
+ * Route /about-us — Swedish Drivknuten 'Om oss' (Helsingborg, drivaxlar) | src/pages/about-us.tsx | small
+ * Route /payment-methods — Swedish Klarna/Swish/faktura text | src/pages/payment-methods.tsx | small
+ * Route /shipping-delivery — Swedish DHL/postombud text (99 kr / 159 kr) | src/pages/shipping-delivery.tsx | small
+ * Route /warranty — Swedish 'Garantier' incl. drivknut-specific clauses | src/pages/warranty.tsx | small
+ * Route /returns-refunds — Swedish 'Returer & Återbetalningar' (distansavtalslagen) | src/pages/returns-refunds.tsx | small
+ * Route /privacy-policy — Swedish 'Integritetspolicy' | src/pages/privacy-policy.tsx | small
+ * Route /legal-information — Swedish 'Juridisk information' (Företagsuppgifter) | src/pages/legal-information.tsx | small
+ * Route /terms — lorem-ipsum Terms component + signature.jpg, Drivknuten SEO description, 'last modified 27 May 2018' | src/pages/terms.tsx | small
+ * Route /contact-us — Swedish hardcoded copy with [INFO] placeholders, Drivknuten SEO text | src/pages/contact-us.tsx | small
+ * Route /faq — static i18n FAQ with lorem-ipsum answers; NOT wired to backend faq plugin; Drivknuten SEO text; sample FAQ JSON-LD mentions 500 SEK | src/pages/faq.tsx | small
+ * Route /track-order — non-functional template form (no submit handler) | src/pages/track-order.tsx | trivial
+ * Route /wishlist — localStorage Redux wishlist page | src/pages/wishlist.tsx | small
+ * Route /account/garage — vehicle garage (CarLookupForm, Swedish reg-number lookup) | src/pages/account/garage.tsx | small
+ * _app.tsx — provider stack (Apollo, LanguageProvider, Auth, Car, Garage, ProductCategories), Redux load/save, customerToken restore, cart sync only on /cart|/account | src/pages/_app.tsx | small
+ * CarIndicator.tsx / CarDropdown — legacy vehicle/garage dropdown; still rendered in MobileHeader with VehiclePickerModal | src/components/header/CarIndicator.tsx | small
+ * public/robots.txt — Drivknuten header and drivknuten.se sitemap URL | public/robots.txt | trivial
+ * next.config.js Drivknuten-only rewrites: /car/*, /carSearch/*, /carSearchDropdown/* → backend car-lookup plugin | next.config.js | trivial
+ * route-localization-rules.js + services/localized-routes.ts — empty slug-localization rule table (toSwedishPath/toEnglishPath are identity), with go-live note about permanent 308 redirects | route-localization-rules.js | trivial
+ * services/i18n/* (provider, utils, context, hooks, global-intl) — react-intl loader merging de.json into en.json, reload-on-locale-switch | src/services/i18n | small
+ * src/data/site-documents.ts — 7 Swedish Drivknuten legal/about documents (about, payment, shipping, warranty, returns, privacy, legal), 99 Swedish/Drivknuten grep hits | src/data/site-documents.ts | trivial
+ * src/data/mobileMenuFromDesktop.ts + productCategories.ts — RedParts megamenu→mobile converter and Drivknuten '/drivlina/[[...slug]]' category tree normaliser | src/data/productCategories.ts | trivial
+ * Contexts: CarContext, GarageContext (localStorage garageVehicles/currentCarId), services/car-search-history.ts, currentActiveCarStorage.ts, utils/vehicleDisplay.ts, vehicleIdentifier.ts, regNr.ts, interfaces/car.ts, store/homepage (car brands) | src/contexts/GarageContext.tsx | small
+ * src/api/car.api.ts + fetchWithLoader.ts — Swedish registration lookup (/carSearch/:regNr, /carSearchDropdown, wheel data) | src/api/car.api.ts | trivial
+ * Unused Drivknuten blocks: BlockSlideshow, BlockBanners (drivaxlar banners), BlockVehicleHero ('Välj ditt fordon'), BlockProductsCarousel, HeroSkeleton — 0 importers | src/components/blocks/BlockBanners.tsx | trivial
+ * Drivknuten shop/shared components: CarLookupForm (1156 lines), VehiclePickerModal, CompatibilityStatusBadge, FitmentGuaranteeNote, DrivelinePageHeader, ShopPageCategory, WidgetProductCategories, WidgetCategories(List), ShopSidebar, Specification, ReviewsView/ReviewsList/Rating, ProductQuestion, ShareLinks, services/product-category-query.ts, product-category-products.ts, category-translation.ts, hooks/useProductSearch | src/components/shared/CarLookupForm.tsx | small
+ * services/shippingMethodPresentation.ts + constants/shipping-methods.ts + customerGroupClassification.ts — Swedish shipping codes (pickup, home-delivery, postombud, foretagsfrakt) with Swedish copy served for German locale | src/services/shippingMethodPresentation.ts | trivial
+ * src/svg/* (42 RedParts icons incl. car-20/32, heart, wishlist, fit/no-fit) + .babelrc inline-react-svg + patches/react-hook-form patch | src/svg/index.tsx | trivial
+ * src/scss — 200 files / 1.2 MB RedParts theme (bootstrap, header/mobile variants, 5 colour themes, 30 shop partials incl. vehicle-picker/kustom) + GlobeGuardPages.module.scss (650 lines) + TierPicker.module.scss | src/scss | trivial
+ * Drop assets: drivknuten-logo.avif, drivknuten-footer-logo.png (0 refs), images/banners/* (drivaxlar/drivknut, only BlockBanners), images/slides/* (foretagsrabatter, universal-damasker, 0 refs), images/avatars/avatar-1.jpg (0 refs), images/car-filter.jpg (scss only), images/signature.jpg (terms), images/vehicle-garage.svg (CarIndicator) | public/drivknuten-logo.avif | trivial
+ * 'category images' folder — 502 Swedish-named auto-parts webp images (3.5 MB), unreferenced | category images | trivial
+ * old/ — 7 saved HTML captures of drivknuten.se legal/about pages (16 MB) | old | trivial
+ * doc/ — Autobutik/Drivknuten-era guides: car-lookup-api.md, car-search-history.md, checkout-backend-sync.md (Autobutik, api.autobutik.se), i18n/README.md (swe.json), seo-implementation.md (Autobutik), storefront-products.md (Vendure 3.4 tecDoc), storefront-wishlist-cart.md, product-review-frontend-guide.md | doc | trivial
+ * scripts/optimize-images.js + README-optimize-images.md — AutoButik image optimiser (sharp, webp/avif) | scripts/optimize-images.js | trivial
+ * vite.config.ts — stale Vite config with /carSearch and /tecdoc proxies | vite.config.ts | trivial
+ * package.json — name 'drivknuten' v1.2.0, scripts (dev --webpack -p 3100, serve via pm2 'drivknuten-frontend' -p 8000, optimize:images, postinstall patch-package), deps Bootstrap 5.3.8, reactstrap, react-slick, slick-carousel, photoswipe, rc-slider, react-intl 8, redux/react-redux/next-redux-wrapper, @apollo/client 4, react-hook-form 7.71, react-toastify, @fortawesome, @heroicons, react-icons, sass, full-icu; overrides js-yaml; packageManager yarn | package.json | trivial
+ * README.md — 'drivknuten-frontend … redparts project for drivknuten.se' | README.md | trivial
+--- drop-replaced-by-mollie (2) ---
+ * Route /cart/checkout — server redirect back to /cart (Kustom embed flow placeholder) | src/pages/cart/checkout/index.tsx | trivial
+ * Kustom checkout components: KustomCheckoutSkeleton, CartPaymentMethods 'kustom' entry, CheckoutPayments (0 importers), CheckoutShippingMethods (0 importers), scss/shop/_kustom-loading.scss, shop-checkout.ts createKustomSession → /kustom/create-session | src/components/shop/KustomCheckoutSkeleton.tsx | small
+--- replace-with-other-repo (17) ---
+ * Route /search — Vendure product search page (min 2 chars), German GG_SEARCH_* copy | src/pages/search.tsx | small | NEW has a search template; carry the German/English copy (GG_SEARCH_TITLE, GG_SEARCH_RESULTS_FOR, GG_SEARCH_HINT) as port-copy-only.
+ * Route /404 (SitePageNotFound) | src/pages/404.tsx | trivial | 
+ * Route /account/dashboard — 1118-line dashboard with orders/addresses/profile summaries and a garage widget | src/pages/account/dashboard.tsx | medium | NEW has account area templates; keep only Vendure account API semantics. Only heads/greps read.
+ * Route /account/login — combined login/register (?view=login|register), Vendure customer API | src/pages/account/login.tsx | small | Accounts mandatory at checkout; NEW auth pages replace UI.
+ * Route /account/forgot-password — requestPasswordReset flow | src/pages/account/forgot-password.tsx | trivial | 
+ * Route /account/password-reset?token= — resetPassword | src/pages/account/password-reset.tsx | trivial | 
+ * Route /account/verify-email?token= — verifyCustomerAccount | src/pages/account/verify-email.tsx | trivial | Backend email templates link here (verify/password-reset) — keep the URL shapes url.ts:92-97 or update backend templates.
+ * Route /account/profile, /account/password | src/pages/account/profile.tsx | trivial | 
+ * Route /account/orders, /account/orders/[id] | src/pages/account/orders.tsx | small | 
+ * Route /account/addresses, /account/addresses/[id] (new|id) | src/pages/account/addresses.tsx | small | 
+ * Header.tsx (desktop) — Logo, Search, wishlist/account/cart indicators, MainMenu; CarIndicator already removed from desktop header | src/components/header/Header.tsx | small | NEW navbar replaces; feed it GLOBEGUARD_HEADER_MENU.
+ * Mobile header/menu (MobileHeader, MobileMenu*, MobileMenuSettings) — RedParts off-canvas menu built from headerMenu, language/currency panels, vehicle picker | src/components/mobile | small | 
+ * AccountMenu.tsx / AccountLayout.tsx / AuthLayout.tsx — account dropdown + account nav incl. Garage link | src/components/account/AccountLayout.tsx | trivial | 
+ * Checkout/order components worth reusing logic from: CheckoutForm+RegisterForm (faktura), CheckoutCart, CartShippingMethods, CartMethodSkeleton, ShopPageOrderSuccess (fully i18n-keyed order summary) | src/components/shop/ShopPageOrderSuccess.tsx | small | NEW's multi-step checkout + confirmation replace UI; German i18n strings can be reused.
+ * Generic RedParts services/utils: hooks.ts, pagination.ts, color.ts, photoswipe.ts, utils.ts (baseUrl), validators.ts, router.ts, sidebar.tsx, mobile-menu.ts, forms/*, utils/productSpecs.ts, productPositions.ts, purchaseQuantities.ts, html.ts, safeDomPatch.ts, logger.ts | src/services/hooks.ts | trivial | Template plumbing tied to Pages router/Redux/Bootstrap.
+ * public/placeholder.avif — generic product image placeholder (7 refs) | public/placeholder.avif | trivial | Use NEW's placeholder or keep; not brand-specific.
+ * tsconfig.json — '~/*' → ./src/* alias, strict true | tsconfig.json | trivial | NEW likely uses '@/'. Note next.config typescript.ignoreBuildErrors true means this repo has never been type-clean.
+--- port-logic-rebuild-ui (31) ---
+ * Route / (src/pages/index.tsx) — homepage: hero, BASIC/PRO tier cards with hardcoded 'ab CHF 620.00 / 820.00', ELITE B2B band, BlockBenefits, latest blog posts (ISR 3600s), newsletter | src/pages/index.tsx | medium
+ * Route /index.htm (src/pages/index.htm.tsx) — legacy alias re-exporting homepage | src/pages/index.htm.tsx | trivial
+ * Route /geraet-finden — device-line chooser (BASIC/PRO/ELITE cards with rules, prices 583/790/1'980) | src/pages/geraet-finden.tsx | small
+ * Route /unterstuetzte-marken — supported brand groups grid by vehicle class from brand-compatibility.json + brand-logos.json, PDF link, trademark disclaimer | src/pages/unterstuetzte-marken.tsx | small
+ * Route /warum-globeguard — feature showcase (workshop jobs, capabilities, tier comparison), 519 lines of DE/EN copy | src/pages/warum-globeguard.tsx | medium
+ * Route /support — support hub (SGW, manuals PDF, partner workshops placeholder, FAQ link) | src/pages/support/index.tsx | small
+ * Route /support/sgw — SGW compatibility table from brand-compatibility.json (bypass cable years, licence group years), links to services/zubehoer | src/pages/support/sgw.tsx | small
+ * Route /produkte — product overview (tiers, accessories, services, updates) | src/pages/produkte/index.tsx | small
+ * Route /produkte/basic — BASIC finder (TierPicker, fetchTierProductsSafe SSR) | src/pages/produkte/basic.tsx | medium
+ * Route /produkte/pro — PRO finder | src/pages/produkte/pro.tsx | medium
+ * Route /produkte/womo — WoMo finder (base-vehicle brand + Truma module, GG-BASIC-WOMO-<SLUG>) | src/pages/produkte/womo.tsx | medium
+ * Route /produkte/elite — ELITE vehicle-class chooser + Mixed 4-10 (SKU texts GG-ELITE-*-MB) | src/pages/produkte/elite.tsx | medium
+ * Route /produkte/kategorie/[slug] — Vendure collection listing (zubehoer / services / software-updates known collections) | src/pages/produkte/kategorie/[slug].tsx | small
+ * Route /products/[slug] — product detail (ShopPageProduct + ProductConfigurator) | src/pages/products/[slug].tsx | large
+ * Route /cart — cart page with shipping/payment selection, SGW remove dialog, Kustom redirect | src/pages/cart/index.tsx | medium
+ * Route /cart/checkout/[token] — order confirmation by order token (completedOrderCache + 3x retry), KustomCheckoutSkeleton while loading | src/pages/cart/checkout/[token].tsx | small
+ * Route /blog — blog listing (SSR, pagination 10, sidebar) via Vendure BlogPlugin shop API | src/pages/blog/index.tsx | small
+ * Route /blog/[slug] — post detail (getStaticPaths/Props, FAQ accordion, Article JSON-LD, decorated inline images) | src/pages/blog/[slug].tsx | small
+ * Route /sitemap.xml — dynamic sitemap (static entries + blog posts), de-CH/en/x-default hreflang, s-maxage 3600 | src/pages/sitemap.xml.tsx | small
+ * Topbar.tsx — links (shipping, returns, about, blog, contact) + DropdownLanguage (de/en) + DropdownCurrency (CHF/EUR) | src/components/header/Topbar.tsx | small
+ * Footer.tsx — contacts (theme.ts), Information links (about, payment, shipping, warranty, returns, privacy, legal, contact), My Account links (dashboard, garage, orders, addresses, wishlist, track order), newsletter+social, copyright, globeguard-logo.svg badge | src/components/footer/Footer.tsx | small
+ * SEO.tsx — title suffix ' - GlobeGuard', GlobeGuard DE/EN default description+keywords, robots via route-indexing, canonical, hreflang de-CH/en/x-default, OG locale de_CH/en_US, article/product OG, structuredData injection, default currency CHF | src/components/shared/SEO.tsx | small
+ * structured-data.ts — JSON-LD builders: Organization(+ContactPoint, PostalAddress Cham/CH), WebSite(SearchAction), Product(Offer CHF, AggregateRating), BreadcrumbList, CollectionPage(ItemList), Article, Blog(BlogPosting), FAQPage, ContactPage | src/services/seo/structured-data.ts | small
+ * route-indexing.ts — noindex rules (/account, /konto, /cart, /kundvagn, /wishlist, /track-order, /kassa; /drivlina with position/sort/regNr params) + robots strings | src/services/seo/route-indexing.ts | trivial
+ * middleware.ts — sets X-Robots-Tag on every HTML route via resolveRobotsContent; skips /shop-api,/api,/assets,/asset,/car* | middleware.ts | trivial
+ * next.config.js rewrites still needed: /shop-api/* and /api/* → BACKEND/shop-api/*, /assets/* and /asset/* → BACKEND | next.config.js | trivial
+ * services/locale.ts — isGermanLocale, isSwedishLocale alias, vendureLanguageCode(), detectClientLanguageCode() (de unprefixed, /en prefix) | src/services/locale.ts | trivial
+ * Blog components: BlogSidebar + widgets (WidgetAboutUs, WidgetSearch, WidgetTags, WidgetReadTime, WidgetPosts, WidgetNewsletter), PostCard, BlockPosts | src/components/blog/BlogSidebar.tsx | small
+ * services/cartSuccessToast.ts, completedOrderCache.ts — small event/sessionStorage helpers | src/services/completedOrderCache.ts | trivial
+ * .github/workflows/deploy.yml — on push main: SSH (secrets SSH_HOST, SSH_PRIVATE_KEY; SSH_PORT default 222; SSH_USER default 'register'; FRONTEND_PORT default 8000) into $HOME/apps/globeguard-frontend, back up .env.local, git fetch+reset --hard FETCH_HEAD, npm ci, wait for http://127.0.0.1:3000/shop-api (activeChannel query, 30x2s), npm run build, pm2 start/restart 'globeguard-frontend' on port 8000, pm2 save | .github/workflows/deploy.yml | trivial
+ * Dockerfile — node:22-bookworm-slim, copies patches before npm ci (postinstall patch-package), ARG NEXT_PUBLIC_BACKEND_URL=http://server:3000 baked at build, `next build --webpack` (Babel needed), EXPOSE 3100, `next start -p 3100` | Dockerfile | trivial
+--- port-copy-only (12) ---
+ * _document.tsx — favicon ?v=globeguard, theme-color #0F1E4A, Roboto Google Font, lang/dir from path | src/pages/_document.tsx | trivial
+ * GLOBEGUARD_HEADER_MENU_DE/EN — hand-curated main navigation (Warum GlobeGuard?, BASIC, PRO, ELITE (B2B), Zubehör, Services, Updates & Erweiterungen, Support) | src/contexts/ProductCategoriesContext.tsx | trivial
+ * FooterContacts.tsx — phone/email/address/hours from theme.ts | src/components/footer/FooterContacts.tsx | trivial
+ * next.config.js other settings: i18n locales ['de','en'] defaultLocale de localeDetection false; typescript.ignoreBuildErrors true; sassOptions silenceDeprecations; redirects from route-localization-rules (empty) | next.config.js | trivial
+ * services/url.ts — central route map (produkte tiers, kategorie, products, cart, checkout, account, site pages) | src/services/url.ts | trivial
+ * public/i18n/de.json + en.json — 898 keys each (identical key sets); 10 GG_ keys; ~88 keys with GlobeGuard domain wording; ~163 template-only keys (vehicle/garage/wishlist/track/review), 46 CATEGORY_ + 58 GROUP_ auto-parts keys; 3 TEXT_PAYMENT_KUSTOM_* keys; all values German/English (0 Swedish) | public/i18n/de.json | medium
+ * Page-local DE_COPY/EN_COPY objects (files): index.tsx, geraet-finden.tsx, unterstuetzte-marken.tsx, warum-globeguard.tsx (WORKSHOP_JOBS_DE/EN + copy), support/index.tsx, support/sgw.tsx (+ DE/EN label maps), produkte/index.tsx, produkte/basic.tsx, produkte/womo.tsx, produkte/elite.tsx (PageCopy), produkte/kategorie/[slug].tsx (KNOWN_COLLECTIONS_DE/EN); inline isEn/germanLocale ternaries in produkte/pro.tsx, cart/index.tsx, faktura.tsx | src/pages | medium
+ * src/data/theme.ts — site name, NEXT_PUBLIC_SITE_URL default https://globeguard.ch, logo path/size, colors #0F1E4A / #0083C2, author GlobeGuard GmbH, contacts (Cham, info@globeguard.ch, placeholder phone, Mo-Fr 09:00-17:00) | src/data/theme.ts | trivial
+ * src/api/base/* — abstract AccountApi/BlogApi/CountriesApi + ICheckoutData/ICheckoutItemData with GlobeGuard selection fields | src/api/base/shop.api.ts | trivial
+ * BlockBenefits.tsx — 5 GlobeGuard USP cards (SGW, coverage 75+ brand groups, shipping from Cham CH/LI free no customs, German warehouse for EU/world, updates & Ferndiagnose) | src/components/blocks/BlockBenefits.tsx | trivial
+ * constants/vat-and-shipping.ts — Swiss VAT 8.1%, fallback shipping 9.90 CHF under 200 CHF (placeholder until Vendure methods final) | src/constants/vat-and-shipping.ts | trivial
+ * services/product-highlights.ts — device-only 'most desirable features' bullets (owner decision 2026-07-07) | src/services/product-highlights.ts | trivial
+--- keep-as-is (11) ---
+ * src/data/shopCurrencies.ts — CHF base + EUR display at rate 1.1 | src/data/shopCurrencies.ts | trivial
+ * src/data/shopLanguages.ts — de (default) + en with flag icons | src/data/shopLanguages.ts | trivial
+ * src/data/social-links.ts — env-driven (NEXT_PUBLIC_SOCIAL_FACEBOOK/INSTAGRAM/YOUTUBE_URL), used for footer + Organization sameAs | src/data/social-links.ts | trivial
+ * Blog services: blog/content.ts (decorateBlogContentHtml lazy/alt/width from inline assets), blog/date.ts (de-CH / en-US formatting), blog/sidebar.ts (latest 4, read-time buckets, top 18 tags) | src/services/blog | trivial
+ * public/globeguard-logo.svg (960 B), globeguard-logo-transparent.png (46 KB, 2048x512), favicon.ico, hero-banner-bg.png (649 KB) | public/globeguard-logo.svg | trivial
+ * public/images/vehicle-types/*.png — 10 vehicle-class icons (agrar, all, bus, car, industrial, moto, trailer, truck, van, womo) | public/images/vehicle-types | trivial
+ * public/images/brands — 76 brand logos (69 png, 7 svg; 5.2 MB) fetched by scripts/fetch-brand-logos.mjs from car-logos-dataset/Wikimedia; manifest src/data/brand-logos.json | public/images/brands | trivial
+ * public/downloads/globeguard-supported-vehicle-brands-2025.pdf (190 KB) | public/downloads/globeguard-supported-vehicle-brands-2025.pdf | trivial
+ * public/images/languages/language-de.svg, language-en.svg (keep); language-swe.png, language-1.png (drop, 0 refs) | public/images/languages | trivial
+ * docs/cart-image-resolution.md — contract for order-line image resolution (featuredAsset source/preview, variant→product fallback) | docs/cart-image-resolution.md | trivial
+ * .dockerignore / .gitignore | .dockerignore | trivial
+
+########## new-frontend-design-system — FINDINGS ##########
+--- undecided (5) ---
+ * Font loading (Inter + JetBrains Mono via Google Fonts CSS @import; Geist/Geist_Mono via next/font as fallback vars) | src/app/[locale]/globals.css:1,11-12; src/app/[locale]/layout.tsx:18-26,94 | trivial | Owner must choose Inter (NEW look) vs Roboto (NAVIL/old site). Either way, load ONE family through next/font and remove the Google CSS @import (render-blocking, external request, and Geist is downloaded for nothing).
+ * Currency picker (cookie-based Vendure channel-currency switch) - NOT mounted | src/components/layout/navbar/currency-picker.tsx; currency-picker-wrapper.tsx; src/lib/currency.ts; src/lib/currency-server.ts; src/lib/actions/switch-currency.ts; src/lib/vendure/api.ts:69-72 | small | This is a real multi-currency switch, i.e. it changes what Vendure charges, which contradicts NAVIL's locked decision that EUR is a display-only x1.1 conversion of NET CHF. Owner must decide: (a) keep NAVIL rule -> rebuild picker as pure display conversion (port logic from NAVIL Topbar selector) and never send currencyCode to Vendure; or (b) configure EUR as a real channel currency in Vendure with
+ * Message keys whose values contain business claims (must be audited against NAVIL facts) | messages/en.json; messages/de.json | small | None of these are catastrophically wrong, but shipping-origin and VAT wording conflict with NAVIL decisions; owner to approve final DE/EN strings.
+ * .npmrc supply-chain hardening (min-release-age=7, ignore-scripts=true) | .npmrc | trivial | Sensible policy, but ignore-scripts=true breaks any dependency that needs a postinstall (e.g. sharp for next/image in some setups, esbuild binaries) - verify `npm ci && npm run build` in the merged workspace before adopting repo-wide; NAVIL backend (Vendure) will almost certainly need install scripts.
+ * .mcp.json (chrome-devtools + next-devtools MCP servers via bunx) | .mcp.json | trivial | Developer tooling only; harmless. Requires bun on the dev machine. Keep or drop per team preference.
+--- drop-drivknuten (4) ---
+ * FeaturedProducts (hardcoded starter collection slug 'electronics') - unused | src/components/commerce/featured-products.tsx | trivial
+ * OpenGraph image route | src/app/[locale]/opengraph-image.tsx | trivial
+ * .github/workflows/deploy.yml (SSH deploy to Bilregistret server, pm2) | .github/workflows/deploy.yml | trivial
+ * public/ starter and unreferenced assets | public/next.svg; public/vendure.svg; public/logo.png; public/logo-dark.png; public/logo-original.png; public/Hero-Product-Image.png; public/placeholders/*.svg (7) | trivial
+--- drop-wrong-logic (5) ---
+ * HeroSection component (unused) | src/components/layout/hero-section.tsx | trivial
+ * Home page inline copy object (homeCopy en/de) - all business claims | src/app/[locale]/page.tsx:50-353 | medium
+ * ImagePlaceholder component (AI image-prompt scaffolding) and AI-generated mockup PNGs | src/components/commerce/home-interactive-sections.tsx:24-140; public/GlobeGuard-Basic-Device.png, GlobeGuard-Pro-Device.png, GlobeGuard-Camper-Pack.png, GlobeGuard-Elite-Set.png, Remote-Diagnostics-Flow-Diagram.png, App-Ecosystem-Device-Mockups.png, Elite-B2B-Workspace-Mockup.png, Hero-Product-Image.png, hero-banner-bg.png | small
+ * CompatibilityWizard + VinChecker + /api/compatibility/recommendation + lib/vendure/compatibility.ts | src/components/commerce/compatibility-wizard.tsx; src/components/commerce/vin-checker.tsx; src/app/api/compatibility/recommendation/route.ts; src/lib/vendure/compatibility.ts | large
+ * Home page section: Testimonials | src/app/[locale]/page.tsx:850-877 and :176-183,:327-334 | trivial
+--- replace-with-other-repo (3) ---
+ * Partners page (situations grid, partner list cards, side CTA) | src/app/[locale]/partners/page.tsx; src/content/globeguard.ts:86-107,209-230 | small | Keep the card layout as the rendering for NAVIL's store-locator data; do not trust the hardcoded list.
+ * Support page (topic cards, downloads table, contact CTA) | src/app/[locale]/support/page.tsx; src/content/globeguard.ts:75-85,198-207 | medium | Keep table/card layout; populate from NAVIL support hub content and real downloads; add /support/sgw.
+ * Dockerfile / docker-compose | (absent) | small | Use NAVIL Docker full-stack setup; NEW's `output: 'standalone'` makes a small Node runtime image straightforward.
+--- port-logic-rebuild-ui (17) ---
+ * Hardcoded off-token hex colours and non-existent Tailwind shades in components/pages | src/components/commerce/product-card.tsx:235,329; src/app/[locale]/search/search-term.tsx:43-44; src/components/commerce/product-carousel.tsx:18,22; src/components/commerce/sort-dropdown.tsx:39; src/app/[locale]/page.tsx (many); partners/support/contact pages | small
+ * Desktop navbar (sticky header, brand, hover dropdowns, CTA, utility cluster) | src/components/layout/navbar.tsx | medium
+ * Home page hero (photo background + overlay, H1, two CTAs, inline compact CompatibilityWizard) | src/app/[locale]/page.tsx:387-428; public/hero-banner-bg.png | medium
+ * Home page section skeleton and visual patterns (13 sections: hero, trust bar, product ecosystem 4-card grid, comparison table, supported vehicles selector, licence 4-step, remote diagnostics flow, app ecosystem split, industries 6-card grid, Elite B2B split, testimonials, FAQ accordion, final CTA) | src/app/[locale]/page.tsx:384-919; src/components/commerce/home-interactive-sections.tsx | large
+ * SupportedVehiclesSelector (hardcoded 30-brand list with categories, search, tab filter, links to /search?brand=) | src/components/commerce/home-interactive-sections.tsx:143-320; public/brand-logos/*.svg (30 files) | medium
+ * RemoteDiagnosticsFlow (step timeline + fake terminal animation) | src/components/commerce/home-interactive-sections.tsx:373-~500 | small
+ * Product detail page template (breadcrumb, 2-col image carousel + info, 4 benefit tiles, tabs + side widget, related carousel) | src/app/[locale]/product/[slug]/page.tsx | large
+ * ProductInfo (variant option radio groups synced to URL, quantity, add-to-cart with toast) | src/components/commerce/product-info.tsx | large
+ * ProductCard (grid + list variants) and product-name regex heuristics | src/components/commerce/product-card.tsx; src/components/commerce/product-visual.tsx | medium
+ * Price component | src/components/commerce/price.tsx | trivial
+ * Collection page template | src/app/[locale]/collection/[slug]/page.tsx | small
+ * Search page template (SearchTerm header with tabs, SearchResults, noindex) | src/app/[locale]/search/page.tsx; search-term.tsx; search-results.tsx; src/lib/search-helpers.ts | small
+ * Contact page (info aside + inquiry form) | src/app/[locale]/contact/page.tsx; src/content/globeguard.ts:118-125,241-248 | small
+ * next-intl routing/config (locales en+de, defaultLocale en, default localePrefix, proxy middleware, request config, navigation helpers, locale-utils) | src/i18n/routing.ts; src/i18n/request.ts; src/i18n/navigation.ts; src/i18n/server.ts; src/i18n/locale-utils.ts; src/proxy.ts | trivial
+ * sitemap.ts | src/app/sitemap.ts | small
+ * favicon location | src/app/[locale]/favicon.ico | trivial
+ * Home page section: Elite B2B, App Ecosystem, Industries, Trust bar, Comparison table (visual blocks) | src/app/[locale]/page.tsx:431-453,610-664,731-771,774-801,804-847 | medium
+--- port-copy-only (5) ---
+ * Footer (6 link columns, contact strip, copyright, fake status indicator) | src/components/layout/footer.tsx | small
+ * src/content/globeguard.ts (static bilingual content object) | src/content/globeguard.ts | small
+ * messages/en.json + messages/de.json (18 namespaces, 455 keys each) | messages/en.json; messages/de.json | medium
+ * README.md | README.md | trivial
+ * docs/globeguard-source-inventory.md | docs/globeguard-source-inventory.md | trivial
+--- keep-as-is (28) ---
+ * Tailwind v4 design tokens (globals.css: @theme inline, :root and .dark HSL variables, radius, base layer, utilities) | src/app/[locale]/globals.css:8-182 | trivial
+ * Dark mode: ThemeProvider (next-themes, attribute=class, defaultTheme=system) + @custom-variant dark + ThemeSwitcher dropdown | src/components/providers/theme-provider.tsx; src/components/layout/navbar/theme-switcher.tsx; src/app/[locale]/globals.css:6 | trivial
+ * shadcn/ui primitives (61 files, style base-vega on @base-ui/react, baseColor slate, lucide icons) | src/components/ui/*.tsx; components.json | trivial
+ * Root locale layout (html lang, NextIntlClientProvider, ThemeProvider, Navbar/Footer/Toaster shell, generateStaticParams, generateMetadata with title template + hreflang alternates) | src/app/[locale]/layout.tsx | trivial
+ * Mobile navigation (Sheet drawer with search, static links, Vendure top collections, account links) | src/components/layout/navbar/mobile-nav.tsx; src/components/layout/navbar/mobile-nav-wrapper.tsx | trivial
+ * Brand logo component (light/dark PNG swap) | src/components/layout/globeguard-brand.tsx; public/globeguard-logo-transparent.png; public/globeguard-logo-transparent-dark.png | trivial
+ * Cart icon + server NavbarCart (active order quantity badge) | src/components/layout/navbar/cart-icon.tsx; src/components/layout/navbar/navbar-cart.tsx | trivial
+ * User menu (NavbarUser server component + LoginButton client, greeting, Profile/Orders/Sign out) | src/components/layout/navbar/navbar-user.tsx; src/components/layout/navbar/login-button.tsx | trivial
+ * Language picker (dropdown, router.replace(pathname,{locale})) | src/components/layout/navbar/language-picker.tsx; src/i18n/routing.ts | trivial
+ * Search input (client form -> /search?q=) - NOT mounted in navbar | src/components/layout/search-input.tsx; src/components/shared/skeletons/search-input-skeleton.tsx | trivial
+ * NavbarCollections / NavbarLink (active-segment aware link list from content.nav) - dead code | src/components/layout/navbar/navbar-collections.tsx; navbar-link.tsx | trivial
+ * FAQAccordionSection | src/components/commerce/home-interactive-sections.tsx:323-372 | trivial
+ * ProductImageCarousel | src/components/commerce/product-image-carousel.tsx | trivial
+ * ProductGrid (toolbar with view toggle + count + sort, grid/list rendering, pagination) | src/components/commerce/product-grid.tsx; product-view-toggle.tsx; sort-dropdown.tsx; src/components/shared/pagination.tsx | trivial
+ * FacetFilters (collapsible facet groups, mobile Sheet, URL ?facets= multi-select, clear all) | src/components/commerce/facet-filters.tsx; src/lib/search-helpers.ts | trivial
+ * OrderStatusBadge | src/components/commerce/order-status-badge.tsx | trivial
+ * ProductCarousel (embla) and RelatedProducts | src/components/commerce/product-carousel.tsx; src/components/commerce/related-products.tsx | trivial
+ * lib/metadata.ts helpers (SITE_NAME/SITE_URL, truncateDescription, buildCanonicalUrl, buildOgImages, noIndexRobots) | src/lib/metadata.ts | trivial
+ * robots.ts | src/app/robots.ts | trivial
+ * /api/revalidate route (Bearer secret, tag classification and locale/currency expansion) | src/app/api/revalidate/route.ts; src/lib/vendure/cached.ts | small
+ * /api/health route | src/app/api/health/route.ts | trivial
+ * not-found page | src/app/[locale]/not-found.tsx | trivial
+ * shared components (NavigationLink server link, Pagination, CountrySelect, skeletons) | src/components/shared/** | trivial
+ * lib/format.ts, lib/utils.ts (cn), hooks/use-mobile.ts, contexts/auth-context.tsx, lib/auth.ts, lib/search-helpers.ts | src/lib/format.ts; src/lib/utils.ts; src/hooks/use-mobile.ts; src/contexts/auth-context.tsx; src/lib/auth.ts; src/lib/search-helpers.ts | trivial
+ * next.config.ts (standalone output, next-intl plugin, image config) | next.config.ts | trivial
+ * package.json / toolchain (Next 16.2, React 19.2, Tailwind 4.3, shadcn 4.12, @base-ui/react 1.6, next-intl 4.13, gql.tada 1.11, TypeScript 6.0, dev port 3001) | package.json; tsconfig.json; postcss.config.mjs; eslint.config.mjs; graphql.config.yml | small
+ * .env.example / env var surface | .env.example; src/lib/vendure/api.ts:5-8; src/lib/metadata.ts:3-4; src/lib/auth.ts:3; src/app/api/revalidate/route.ts:35 | trivial
+ * LICENSE (MIT, Vendure GmbH 2025) | LICENSE | trivial
+
+########## new-frontend-commerce-flow — FINDINGS ##########
+--- undecided (2) ---
+ * Currency cookie + channel-currency switching (server action) + picker | src/lib/currency-server.ts | small | NAVIL rule: prices are NET CHF; EUR is a display-only conversion CHF x 1.1 (HANDOFF.md:46, PROJECT-CONTEXT.md:40,128) and no EUR currency is configured on the NAVIL channel (grep for availableCurrencyCodes/EUR in NAVIL src/scripts/deploy: empty). Options: (a) keep the cookie + picker but drop ?currencyCode= and implement x1.1 in Price (matches NAVIL); (b) owner adds EUR to the channel with real EU
+ * Public assets: 30 vehicle-brand SVG logos and placeholder SVGs | public/brand-logos | trivial | Third-party manufacturer logos raise trademark questions; NAVIL's brand-compatibility.json (77 brand groups) is the data source, not this list. Placeholders can go once real assets exist.
+--- drop-wrong-logic (15) ---
+ * Compatibility data client (compatibilityOptions / compatibilityRecommendation / productCompatibility) | src/lib/vendure/compatibility.ts | trivial
+ * Compatibility recommendation API route | src/app/api/compatibility/recommendation/route.ts | trivial
+ * Compatibility wizard component (home hero) | src/components/commerce/compatibility-wizard.tsx | trivial
+ * VIN / brand coverage checker | src/components/commerce/vin-checker.tsx | trivial
+ * Home interactive sections (ImagePlaceholder w/ AI prompts, SupportedVehiclesSelector, FAQAccordionSection, RemoteDiagnosticsFlow) | src/components/commerce/home-interactive-sections.tsx | trivial
+ * Site content constants (nav, hero, product families, comparison, support, partners, events, contact) | src/content/globeguard.ts | small
+ * Home page (hero, trust bar, product ecosystem incl. 'GlobeGuard Camper', comparison table, supported vehicles, licenses steps, remote diagnostics, app ecosystem, industries, Elite B2B, testimonials, FAQ, final CTA) | src/app/[locale]/page.tsx | medium
+ * Product detail tabs (Overview / Vehicle Compatibility / Package Contents) | src/components/commerce/product-detail-tabs.tsx | small
+ * Product visual classification + SVG placeholders | src/components/commerce/product-visual.tsx | trivial
+ * Contact step (guest email/name via setCustomerForOrder) | src/app/[locale]/checkout/steps/contact-step.tsx | trivial
+ * Unused hero section / navbar collections / search input components | src/components/layout/hero-section.tsx | trivial
+ * Messages: Hero / Home / Product.faq / Product.trustBadges / Product.placement / Product.brandLevelCoverage* / Product.detailBenefits / Product.starRating / Search.brand* / Footer.github|documentation|sourceCode|vendure|poweredBy / Auth.featureEasy|featureReturns|joinUs | messages/en.json | trivial
+ * Public assets: AI-generated product mockups and hero | public/GlobeGuard-Basic-Device.png | trivial
+ * docs/globeguard-source-inventory.md | docs/globeguard-source-inventory.md | trivial
+ * Contact / Support / Partners pages | src/app/[locale]/contact/page.tsx | small
+--- drop-replaced-by-mollie (3) ---
+ * 'standard-payment' dummy-handler metadata in placeOrder | src/app/[locale]/checkout/actions.ts | trivial
+ * NAVIL Kustom (ex-Klarna) checkout plugin | C:/Users/carlo/OneDrive/Desktop/Navil_gg_website/globeguard-backend/src/plugins/kustom | trivial
+ * NAVIL placeholder 'sumup' and 'paypal' payment methods | C:/Users/carlo/OneDrive/Desktop/Navil_gg_website/globeguard-backend/src/plugins/payments/payment.plugin.ts | trivial
+--- replace-with-other-repo (1) ---
+ * GitHub Actions deploy workflow (pm2 on SSH host) | .github/workflows/deploy.yml | small | NAVIL has the Hetzner konsoleH supervisor (deploy/app.js proxying Next + Vendure) and Docker full-stack per PROJECT-CONTEXT.md; use NAVIL's deploy story.
+--- port-copy-only (1) ---
+ * Contact block inside content/globeguard.ts | src/content/globeguard.ts | trivial
+--- keep-as-is (57) ---
+ * Vendure fetch client (endpoint/channel/auth/lang/currency/cache/error handling) | src/lib/vendure/api.ts | trivial
+ * Auth token cookie helpers | src/lib/auth.ts | trivial
+ * gql.tada init + scalars | src/graphql.ts | trivial
+ * Generated schema types (must be regenerated against NAVIL shop-api) | src/graphql-env.d.ts | small
+ * Queries (collections, customer, search, product detail, active order, checkout order, addresses, shipping/payment methods, countries, orders, order detail, channel, collection products) | src/lib/vendure/queries.ts | small
+ * Mutations (login/logout/register/verify/reset/password/email, cart, coupons, addresses, checkout addresses/shipping/transition/payment, setCustomerForOrder) | src/lib/vendure/mutations.ts | small
+ * Fragments (ProductCard on SearchResult, ActiveCustomer) | src/lib/vendure/fragments.ts | trivial
+ * 'Cached' channel/countries/top-collections helpers | src/lib/vendure/cached.ts | trivial
+ * getActiveCustomer (React cache) / getActiveChannel | src/lib/vendure/actions.ts | trivial
+ * Display option groups helper (Vendure >=3.6 shared option groups) | src/lib/vendure/product-options.ts | trivial
+ * Product page shell (metadata, breadcrumb, carousel + info grid, benefits, related) | src/app/[locale]/product/[slug]/page.tsx | small
+ * Product info (variant/option selection, quantity, add-to-cart, price) | src/components/commerce/product-info.tsx | medium
+ * Product image carousel | src/components/commerce/product-image-carousel.tsx | trivial
+ * Related products (same primary collection via search) | src/components/commerce/related-products.tsx | trivial
+ * Product card (grid/list) with inline add-to-cart | src/components/commerce/product-card.tsx | small
+ * Featured products (hardcoded 'electronics' collection) | src/components/commerce/featured-products.tsx | trivial
+ * Product grid / facet filters / sort dropdown / view toggle / pagination | src/components/commerce/product-grid.tsx | trivial
+ * Collection page | src/app/[locale]/collection/[slug]/page.tsx | trivial
+ * Search page + results + term header | src/app/[locale]/search/page.tsx | trivial
+ * Cart page + server component + items + summary + promotion code | src/app/[locale]/cart/cart.tsx | small
+ * Cart server actions (remove, adjust, apply/remove coupon) | src/app/[locale]/cart/actions.ts | trivial
+ * Add-to-cart server action | src/app/[locale]/product/[slug]/actions.ts | small
+ * Checkout page (data loading, guards) | src/app/[locale]/checkout/page.tsx | small
+ * Checkout provider + step machine (accordion) | src/app/[locale]/checkout/checkout-flow.tsx | trivial
+ * Shipping address step (saved address radio / new address dialog / guest inline form) | src/app/[locale]/checkout/steps/shipping-address-step.tsx | small
+ * Delivery step (eligibleShippingMethods radio) | src/app/[locale]/checkout/steps/delivery-step.tsx | trivial
+ * Payment step (method radio, client-only selection) | src/app/[locale]/checkout/steps/payment-step.tsx | medium
+ * Review step + placeOrder action (transition + addPaymentToOrder) | src/app/[locale]/checkout/actions.ts | medium
+ * Checkout order summary (mobile collapsible + desktop sticky) | src/app/[locale]/checkout/order-summary.tsx | trivial
+ * Order confirmation page | src/app/[locale]/order-confirmation/[code]/order-confirmation.tsx | small
+ * Account layout + nav links | src/app/[locale]/account/layout.tsx | trivial
+ * Profile page (update name, request email change, change password) | src/app/[locale]/account/profile/actions.ts | trivial
+ * Email-change verification page | src/app/[locale]/account/verify-email/page.tsx | trivial
+ * Addresses page (CRUD + default shipping/billing) | src/app/[locale]/account/addresses/actions.ts | trivial
+ * Orders list + order detail | src/app/[locale]/account/orders/page.tsx | trivial
+ * Sign-in page/form/actions (login, logout) | src/app/[locale]/sign-in/actions.ts | trivial
+ * Register page/form/actions | src/app/[locale]/register/actions.ts | trivial
+ * Verify account page (token from email) | src/app/[locale]/verify/verify-content.tsx | trivial
+ * Verify-pending page | src/app/[locale]/verify-pending/page.tsx | trivial
+ * Forgot-password page/form/action | src/app/[locale]/forgot-password/actions.ts | trivial
+ * Reset-password page/form/action | src/app/[locale]/reset-password/actions.ts | trivial
+ * Account nav links component | src/components/account/account-nav-links.tsx | trivial
+ * Auth context (unused) | src/contexts/auth-context.tsx | trivial
+ * useIsMobile hook | src/hooks/use-mobile.ts | trivial
+ * i18n routing/request/navigation/server/locale-utils + proxy middleware | src/i18n/routing.ts | trivial
+ * Price component | src/components/commerce/price.tsx | trivial
+ * Format / metadata / utils helpers | src/lib/metadata.ts | trivial
+ * Root locale layout | src/app/[locale]/layout.tsx | trivial
+ * Navbar shell + sub-components (cart icon, user menu, language picker, theme switcher, mobile nav) | src/components/layout/navbar.tsx | small
+ * Footer shell | src/components/layout/footer.tsx | small
+ * Country select combobox | src/components/shared/country-select.tsx | trivial
+ * Order status badge | src/components/commerce/order-status-badge.tsx | trivial
+ * Revalidate webhook route | src/app/api/revalidate/route.ts | small
+ * Health route, robots, sitemap | src/app/sitemap.ts | trivial
+ * next.config.ts / .env.example | next.config.ts | trivial
+ * Messages: Cart / Checkout / OrderStatus / OrderConfirmation / Account / Auth / Verify / Errors / Navigation / Sort / Filters / Common namespaces | messages/de.json | trivial
+ * Logo files | public/globeguard-logo-transparent.png | trivial
+
+########## new-backend-salvage — FINDINGS ##########
+--- undecided (1) ---
+ * Bexio customer custom-field names (bexioContactNumber, bexioCategory, bexioIndustry) | src/vendure-config.ts:109-113, src/migrations/1783200000000-globeguard-catalog-architecture.ts:17-19 | trivial | Owner should decide whether the NAVIL Bexio plugin already stores a contact number / category / industry mapping; if not, these three names are a reasonable naming suggestion, nothing more. No logic to salvage.
+--- drop-wrong-logic (10) ---
+ * globeguard-data plugin — CompatibilityRule / VehicleBrand / VehicleGroup entities + brand-first recommendation engine | src/plugins/globeguard-data/{globeguard-data.plugin.ts,entities/*.ts,services/globeguard-data.service.ts,api/*.ts} | trivial
+ * globeguard-data importer (GlobeGuardImportService) + CLI entry | src/plugins/globeguard-data/services/globeguard-import.service.ts, src/plugins/globeguard-data/cli/import-globeguard-data.ts | trivial
+ * Facet taxonomy constants (product-family, product-type, vehicle-group, adapter-group, support-mode) | src/plugins/globeguard-data/catalog-facets.ts | trivial
+ * Product/ProductVariant custom fields (importKey, productFamily, productType, vehicleGroup, setCode, updatePrice, subscriptionUpdatePrice, extensionPrice) | src/vendure-config.ts:94-108 | trivial
+ * Hand-written TypeORM migration 1783200000000-globeguard-catalog-architecture | src/migrations/1783200000000-globeguard-catalog-architecture.ts | trivial
+ * Legacy raw-pg import script | scripts/import-globeguard-data.cjs | trivial
+ * src/gql/graphql-env.d.ts + src/gql/graphql.ts (dashboard gql.tada admin-API types) | src/gql/ | trivial
+ * Committed .env (secrets) and vendure.sqlite | .env, vendure.sqlite | trivial
+ * AGENTS.md / README.md | AGENTS.md, README.md | trivial
+ * .codex-backend-dev.log | .codex-backend-dev.log | trivial
+--- drop-replaced-by-mollie (1) ---
+ * Manual payment handler `globeguard-manual-payment` | src/vendure-config.ts:24-45,89-91 | trivial
+--- replace-with-other-repo (7) ---
+ * Email templates (email-verification, password-reset, email-address-change, order-confirmation, partials) | static/email/templates/** | trivial | Keep NAVIL's set entirely. NAVIL's is strictly a superset in design, branding and locale coverage. Note NAVIL CLAUDE.md:22 still describes templates as single-locale — the on-disk state is already per-locale (doc is stale).
+ * GitHub Actions deploy workflow (pm2 over SSH) | .github/workflows/deploy.yml | trivial | Host cannot be determined from disk — SSH_HOST is a secret. The default user 'register' and APP_DIR do not match NAVIL's Hetzner layout, so with default secrets it points at the third party's own server (Bilregistret), not the owner's Hetzner box. Recommend the merged repo keeps NAVIL's Dockerfile/docker-compose + deploy/app.js path and treats this workflow as unverified; if kept, all four secrets
+ * Dockerfile | Dockerfile | trivial | NAVIL's is strictly better.
+ * docker-compose.yml | docker-compose.yml | trivial | Nothing to gain.
+ * vendure-config.ts overall (language, API options, EmailPlugin devMode, DashboardPlugin) | src/vendure-config.ts | trivial | One small idea: `synchronize: process.env.DB_SYNCHRONIZE === 'true'` + `migrations: [glob]` + `runMigrations(config).then(bootstrap)` in index.ts:4-5 is the canonical Vendure pattern the merged repo should adopt when it leaves synchronize mode (see migrations policy in risks).
+ * src/index.ts / src/index-worker.ts | src/index.ts, src/index-worker.ts | trivial | 
+ * vite.config.mts / tsconfig.json / tsconfig.dashboard.json | vite.config.mts, tsconfig.json, tsconfig.dashboard.json | trivial | vite.config.mts:26-28 NODE_ENV=production → api host 'auto' is the same trick NAVIL's Dockerfile:12-14 already relies on.
+--- port-copy-only (2) ---
+ * ImportRun audit entity | src/plugins/globeguard-data/entities/import-run.entity.ts | small
+ * .env.example variable list | .env.example | trivial
+
+########## mollie-and-payments-readiness — FINDINGS ##########
+--- undecided (1) ---
+ * Customer classification by Swedish customer-group names (drives invoice eligibility) | globeguard-backend/src/plugins/shared/customer-classification.ts:3-4, 59-74 | small | Owner decision: which German group names (e.g. 'Firmenkunden'/'Privatkunden') and who assigns customers to them (manual in admin vs. automatic from customFields.uid/vatNumber as the Bexio mapper already infers, per CLAUDE.md). I did not locate the code that creates these groups; the rename must be done in both places. Until this is decided, Rechnung is never eligible for anyone.
+--- drop-drivknuten (2) ---
+ * Template payment copy (bank transfer, cash on delivery, cheque with fake address, PayPal) | globeguard-frontend(NAVIL)/public/i18n/de.json:444-452 | trivial
+ * Payment-methods legal/info page content (Swedish Klarna/Swish text) and privacy mentions of Klarna | globeguard-frontend(NAVIL)/src/data/site-documents.ts:71-91, 282, 311; src/pages/payment-methods.tsx | small
+--- drop-replaced-by-mollie (12) ---
+ * KustomPlugin (constants.ts, kustom.controller.ts, kustom.plugin.ts, kustom.service.ts, kustom-payment.handler.ts, types.ts) | globeguard-backend/src/plugins/kustom/ | trivial
+ * KUSTOM_FRONTEND_BASE_URL env alias | globeguard-backend/src/vendure-config.ts:52-53 | trivial
+ * PaymentPlugin 'sumup' and 'paypal' placeholder methods (both wired to invoicePaymentHandler) | globeguard-backend/src/plugins/payments/payment.plugin.ts:38-55 | trivial
+ * Kustom session/complete-payment client (KustomRedirectResult, createKustomSession, prepareActiveOrderForKustom, completeKustomPayment, kustom branch in checkoutWithVendure) | globeguard-frontend(NAVIL)/src/api/graphql/shop-checkout.ts:275-277, 372-378, 460-701, 941-946 | trivial
+ * CheckoutResult union with KustomRedirectResult | globeguard-frontend(NAVIL)/src/api/base/shop.api.ts:4, 31 | trivial
+ * /cart/checkout index (redirect stub to cart) | globeguard-frontend(NAVIL)/src/pages/cart/checkout/index.tsx | trivial
+ * CheckoutPayments component (react-hook-form radio list with Kustom fallback) | globeguard-frontend(NAVIL)/src/components/shop/CheckoutPayments.tsx | trivial
+ * CartPaymentMethods component | globeguard-frontend(NAVIL)/src/components/shop/CartPaymentMethods.tsx | trivial
+ * KustomCheckoutSkeleton + kustom-loading SCSS | globeguard-frontend(NAVIL)/src/components/shop/KustomCheckoutSkeleton.tsx; src/scss/shop/_kustom-loading.scss; src/scss/style.scss:269 | trivial
+ * Checkout URL helpers | globeguard-frontend(NAVIL)/src/services/url.ts:74-81 | trivial
+ * TEXT_PAYMENT_KUSTOM_* strings | globeguard-frontend(NAVIL)/public/i18n/de.json:453-455; public/i18n/en.json:453-455 | trivial
+ * Next.js rewrites to backend (shop-api, /car*, /assets); no /kustom rewrite | globeguard-frontend(NAVIL)/next.config.js:45-79 | trivial
+--- port-logic-rebuild-ui (6) ---
+ * Vendure checkout orchestration in checkoutWithVendure (state reset, addItemsToOrder with GlobeGuard customFields, address/shipping validation, transition, eligible payment resolution) | globeguard-frontend(NAVIL)/src/api/graphql/shop-checkout.ts:711-978 | medium
+ * getEligiblePaymentMethods (isEligible filter, frontend priority order, de-CH name sort) | globeguard-frontend(NAVIL)/src/api/graphql/shop-checkout.ts:267-303, 380-387 | trivial
+ * Cart page: account gate + 'Weiter zur Zahlung' routing (invoice page vs Kustom) | globeguard-frontend(NAVIL)/src/pages/cart/index.tsx:13-17, 76-77, 84-86, 308-336, 574-617 | small
+ * Order success page /cart/checkout/[token] (order lookup by code with retry, cart clear, sessionStorage cache, Kustom skeleton) | globeguard-frontend(NAVIL)/src/pages/cart/checkout/[token].tsx | small
+ * Invoice (Rechnung) checkout page /cart/checkout/faktura | globeguard-frontend(NAVIL)/src/pages/cart/checkout/faktura.tsx | small
+ * Order interface 'payment' field and success-page display | globeguard-frontend(NAVIL)/src/interfaces/order.ts:30; src/components/shop/ShopPageOrderSuccess.tsx:98 | trivial
+--- port-copy-only (2) ---
+ * Documentation lines describing Kustom/SumUp/PayPal as the payment plan | globeguard-backend/CLAUDE.md:57; HANDOFF.md:184,258,303,353; PROJECT-CONTEXT.md:166,274-275,282,467; README.md:51,67 | trivial
+ * Invoice + checkout error copy | globeguard-frontend(NAVIL)/public/i18n/de.json:84-85, 456-457 (+ en.json same keys) | trivial
+--- keep-as-is (18) ---
+ * paymentOptions.paymentMethodHandlers: [] + PaymentPlugin.init() registration (Mollie plugin registration point) | globeguard-backend/src/vendure-config.ts:135-137, 210 | small
+ * PaymentPlugin 'invoice' method definition + companyCustomer eligibility checker (Rechnung for B2B) | globeguard-backend/src/plugins/payments/payment.plugin.ts:28-37, 58-73, 84-116 | trivial
+ * invoicePaymentHandler (offline, Authorized state, requiresManualSettlement) | globeguard-backend/src/plugins/payments/invoice-payment.handler.ts | trivial
+ * Payment eligibility checkers (alwaysEligible, companyCustomer) | globeguard-backend/src/plugins/payments/payment-configuration.ts | trivial
+ * Backend env template (needs Mollie vars, has no Kustom vars) | globeguard-backend/deploy/backend.env.example | trivial
+ * Hetzner supervisor/proxy for backend + frontend | globeguard-backend/deploy/app.js:23-24, 106-107 | small
+ * Dashboard e2e fixtures using dummyPaymentHandler | globeguard-backend/packages/dashboard/e2e/fixtures/e2e-shared-config.ts:141 | trivial
+ * placeOrder server action (transition → addPaymentToOrder → redirect to /order-confirmation/[code]) | globeguard-frontend(NEW)/src/app/[locale]/checkout/actions.ts:104-145 | medium
+ * transitionToArrangingPayment server action | globeguard-frontend(NEW)/src/app/[locale]/checkout/actions.ts:86-102 | trivial
+ * Payment step UI (radio cards of eligible methods) | globeguard-frontend(NEW)/src/app/[locale]/checkout/steps/payment-step.tsx | medium
+ * Checkout context provider (payment selection state) | globeguard-frontend(NEW)/src/app/[locale]/checkout/checkout-provider.tsx:35-53, 76-78 | trivial
+ * Review step place-order handler | globeguard-frontend(NEW)/src/app/[locale]/checkout/steps/review-step.tsx:24-37, 164-178 | small
+ * Checkout page loader (server-side eligible methods, state guard, currencyCode param) | globeguard-frontend(NEW)/src/app/[locale]/checkout/page.tsx:28-60 | small
+ * Order confirmation page (server component reading orderByCode) | globeguard-frontend(NEW)/src/app/[locale]/order-confirmation/[code]/order-confirmation.tsx | medium
+ * gql.tada client documents (TransitionOrderToState, AddPaymentToOrder) and generated schema | globeguard-frontend(NEW)/src/lib/vendure/mutations.ts:249-290; src/lib/vendure/queries.ts:259-270; src/graphql-env.d.ts | small
+ * Vendure fetch wrapper (bearer token from cookie, channel header, languageCode/currencyCode params) | globeguard-frontend(NEW)/src/lib/vendure/api.ts:5-8, 36-106; src/lib/auth.ts:1-19 | trivial
+ * Checkout / OrderConfirmation message catalogs | globeguard-frontend(NEW)/messages/de.json (Checkout, OrderConfirmation namespaces); messages/en.json | small
+ * Account order detail payments card | globeguard-frontend(NEW)/src/app/[locale]/account/orders/[code]/order-detail.tsx:167-185 | trivial

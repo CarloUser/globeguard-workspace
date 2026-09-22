@@ -1,0 +1,1370 @@
+[
+  {
+    "from": "/en/produkt-kategorie/accessories-en",
+    "to": "/en/produkte/kategorie/zubehoer",
+    "kind": "category",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt-kategorie/globeguard-basic-en",
+    "to": "/en/produkte/basic",
+    "kind": "category",
+    "confidence": "high",
+    "note": "Tier page."
+  },
+  {
+    "from": "/en/produkt-kategorie/globeguard-en",
+    "to": "/en/produkte",
+    "kind": "category",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt-kategorie/globeguard-pro-en",
+    "to": "/en/produkte/pro",
+    "kind": "category",
+    "confidence": "high",
+    "note": "Tier page."
+  },
+  {
+    "from": "/en/produkt-kategorie/globetelematics-en",
+    "to": "/en/produkte",
+    "kind": "category",
+    "confidence": "low",
+    "note": "No GlobeTelematics collection in the new catalogue."
+  },
+  {
+    "from": "/en/produkt-kategorie/services-en",
+    "to": "/en/produkte/kategorie/services",
+    "kind": "category",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt-kategorie/software-updates-en",
+    "to": "/en/produkte/kategorie/software-updates",
+    "kind": "category",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt-kategorie/globeguard-basic-de",
+    "to": "/produkte/basic",
+    "kind": "category",
+    "confidence": "high",
+    "note": "Tier page."
+  },
+  {
+    "from": "/produkt-kategorie/globeguard-de",
+    "to": "/produkte",
+    "kind": "category",
+    "confidence": "high",
+    "note": "Top-level \"GlobeGuard\" product category."
+  },
+  {
+    "from": "/produkt-kategorie/globeguard-pro-de",
+    "to": "/produkte/pro",
+    "kind": "category",
+    "confidence": "high",
+    "note": "Tier page."
+  },
+  {
+    "from": "/produkt-kategorie/globetelematics-de",
+    "to": "/produkte",
+    "kind": "category",
+    "confidence": "low",
+    "note": "No GlobeTelematics collection in the new catalogue."
+  },
+  {
+    "from": "/produkt-kategorie/services-de",
+    "to": "/produkte/kategorie/services",
+    "kind": "category",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt-kategorie/software-updates-de",
+    "to": "/produkte/kategorie/software-updates",
+    "kind": "category",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt-kategorie/zubehor-de",
+    "to": "/produkte/kategorie/zubehoer",
+    "kind": "category",
+    "confidence": "high"
+  },
+  {
+    "from": "/?dlm_download_category=dokumente",
+    "to": "/support",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Download Monitor taxonomy URL (query string, not a path). Needs a Next.js `has` query matcher, and the new site has no downloads route - /support is the closest home."
+  },
+  {
+    "from": "/?dlm_download_category=software",
+    "to": "/support",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Download Monitor taxonomy URL (query string, not a path). Needs a Next.js `has` query matcher, and the new site has no downloads route - /support is the closest home."
+  },
+  {
+    "from": "/?dlm_download_tag=dokumente",
+    "to": "/support",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Download Monitor taxonomy URL (query string, not a path). Needs a Next.js `has` query matcher, and the new site has no downloads route - /support is the closest home."
+  },
+  {
+    "from": "/?dlm_download_tag=downloads",
+    "to": "/support",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Download Monitor taxonomy URL (query string, not a path). Needs a Next.js `has` query matcher, and the new site has no downloads route - /support is the closest home."
+  },
+  {
+    "from": "/?dlm_download_tag=software",
+    "to": "/support",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Download Monitor taxonomy URL (query string, not a path). Needs a Next.js `has` query matcher, and the new site has no downloads route - /support is the closest home."
+  },
+  {
+    "from": "/author/carlo",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "low",
+    "note": "WordPress author archive; the new site has no author pages."
+  },
+  {
+    "from": "/author/infoglobeguard-ch",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "low",
+    "note": "WordPress author archive; the new site has no author pages."
+  },
+  {
+    "from": "/author/miro",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "low",
+    "note": "WordPress author archive; the new site has no author pages."
+  },
+  {
+    "from": "/author/richard",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "low",
+    "note": "WordPress author archive; the new site has no author pages."
+  },
+  {
+    "from": "/category/messe-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog category archive; the new blog has no category routes (frozen route map O1)."
+  },
+  {
+    "from": "/category/news-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog category archive; the new blog has no category routes (frozen route map O1)."
+  },
+  {
+    "from": "/category/veranstaltung-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog category archive; the new blog has no category routes (frozen route map O1)."
+  },
+  {
+    "from": "/en/author/carlo",
+    "to": "/en/blog",
+    "kind": "other",
+    "confidence": "low",
+    "note": "WordPress author archive; the new site has no author pages."
+  },
+  {
+    "from": "/en/author/infoglobeguard-ch",
+    "to": "/en/blog",
+    "kind": "other",
+    "confidence": "low",
+    "note": "WordPress author archive; the new site has no author pages."
+  },
+  {
+    "from": "/en/author/miro",
+    "to": "/en/blog",
+    "kind": "other",
+    "confidence": "low",
+    "note": "WordPress author archive; the new site has no author pages."
+  },
+  {
+    "from": "/en/author/richard",
+    "to": "/en/blog",
+    "kind": "other",
+    "confidence": "low",
+    "note": "WordPress author archive; the new site has no author pages."
+  },
+  {
+    "from": "/en/produkt-schlagwort/4x4-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "low",
+    "note": "Lifestyle tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/adapter-cable-en",
+    "to": "/en/produkte/kategorie/zubehoer",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/androi",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/android-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/apple-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/bus-en",
+    "to": "/en/produkte/kategorie/pro-truck",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/combi-4_en",
+    "to": "/en/products/gg-cable-truma",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Truma tag archive -> the Truma Combi adapter cable set. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/combi-6-en",
+    "to": "/en/products/gg-cable-truma",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Truma tag archive -> the Truma Combi adapter cable set. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/combi-d-en",
+    "to": "/en/products/gg-cable-truma",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Truma tag archive -> the Truma Combi adapter cable set. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/fahrzeugdiagnose-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/ineos_en",
+    "to": "/en/products/gg-basic-car-ineos",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/iveco-daily-en",
+    "to": "/en/products/gg-sgw-cable-ive",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Tag was attached to the IVE SGW bypass cable. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/ktm-en",
+    "to": "/en/produkte/kategorie/adapter",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Tag was attached to the KTM 6p adapter cable. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/mercedes-benz-vario-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "low",
+    "note": "Lifestyle/model tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/motor",
+    "to": "/en/produkte/kategorie/basic-moto",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/motorbike-en",
+    "to": "/en/produkte/kategorie/basic-moto",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/motorhomes-en",
+    "to": "/en/produkte/womo",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Motorhome tag archive -> WoMo tier page. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/obd-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/off-road-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "low",
+    "note": "Lifestyle tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/pc-notebook-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/reisemobile-en",
+    "to": "/en/produkte/womo",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Motorhome tag archive -> WoMo tier page. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/remote-diagnostics-en",
+    "to": "/en/products/gg-svc-fern",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/remotemaintenance-en",
+    "to": "/en/products/gg-svc-fern",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/rvs-en",
+    "to": "/en/produkte/womo",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Motorhome tag archive -> WoMo tier page. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/security-gateway-module-en",
+    "to": "/en/support/sgw",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Security Gateway tag archive -> the SGW explainer page. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/sgw-en",
+    "to": "/en/support/sgw",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Security Gateway tag archive -> the SGW explainer page. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/smartphone-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/sw-update-en",
+    "to": "/en/produkte/kategorie/software-updates",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/tablet-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/trailer-en",
+    "to": "/en/produkte/kategorie/pro-trailer",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/truck-en",
+    "to": "/en/produkte/kategorie/pro-truck",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/truma-en",
+    "to": "/en/products/gg-cable-truma",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Truma tag archive -> the Truma Combi adapter cable set. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/en/produkt-schlagwort/windows-en",
+    "to": "/en/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/4x4-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "low",
+    "note": "Lifestyle tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/adapterkabel-de",
+    "to": "/produkte/kategorie/zubehoer",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/android-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/apple-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/bus-de",
+    "to": "/produkte/kategorie/pro-truck",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/combi-4-de",
+    "to": "/products/gg-cable-truma",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Truma tag archive -> the Truma Combi adapter cable set. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/combi-6-de",
+    "to": "/products/gg-cable-truma",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Truma tag archive -> the Truma Combi adapter cable set. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/combi-d-de",
+    "to": "/products/gg-cable-truma",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Truma tag archive -> the Truma Combi adapter cable set. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/fahrzeugdiagnose-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/ferndiagnose-de",
+    "to": "/products/gg-svc-fern",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/fernwartung-de",
+    "to": "/products/gg-svc-fern",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/ineos-de",
+    "to": "/products/gg-basic-car-ineos",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/iveco-daily-de",
+    "to": "/products/gg-sgw-cable-ive",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Tag was attached to the IVE SGW bypass cable. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/ktm-de",
+    "to": "/produkte/kategorie/adapter",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Tag was attached to the KTM 6p adapter cable. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/lkw-de",
+    "to": "/produkte/kategorie/pro-truck",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/mercedes-benz-vario-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "low",
+    "note": "Lifestyle/model tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/motorrad-de",
+    "to": "/produkte/kategorie/basic-moto",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/obd-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/offroad-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "low",
+    "note": "Lifestyle tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/pc-notebook-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/reisemobile-de",
+    "to": "/produkte/womo",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Motorhome tag archive -> WoMo tier page. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/security-gateway-modul-de",
+    "to": "/support/sgw",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Security Gateway tag archive -> the SGW explainer page. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/sgw-de",
+    "to": "/support/sgw",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Security Gateway tag archive -> the SGW explainer page. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/smartphone-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/sw-update-de",
+    "to": "/produkte/kategorie/software-updates",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/tablet-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/trailer-de",
+    "to": "/produkte/kategorie/pro-trailer",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/truck-de",
+    "to": "/produkte/kategorie/pro-truck",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/truma-de",
+    "to": "/products/gg-cable-truma",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Truma tag archive -> the Truma Combi adapter cable set. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/produkt-schlagwort/windows-de",
+    "to": "/produkte",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Platform/technology tag archive; no equivalent facet on the new site. Bulk rule: product tag archives are not reproduced on the new site."
+  },
+  {
+    "from": "/tag/4x4",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/abenteuer-allrad-2026",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/always-look-twice",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/australia",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/camper-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/cape-to-cape",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/ferndiagnose-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/fernwartung-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/globetrotter-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/ineos",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/mercedes-benz-sprinter",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/mercedes-benz-vario-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/offroad-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/tag/partner-autowerkstaetten-de",
+    "to": "/partner",
+    "kind": "other",
+    "confidence": "medium"
+  },
+  {
+    "from": "/tag/wohnmobil-de",
+    "to": "/blog",
+    "kind": "other",
+    "confidence": "medium",
+    "note": "Blog tag archive; the new blog has no tag routes (frozen route map O1)."
+  },
+  {
+    "from": "/",
+    "to": "/",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/affiliate-area",
+    "to": "/",
+    "kind": "page",
+    "confidence": "low",
+    "note": "AffiliateWP page; the new shop has no affiliate programme."
+  },
+  {
+    "from": "/affiliate-login",
+    "to": "/",
+    "kind": "page",
+    "confidence": "low",
+    "note": "AffiliateWP page; the new shop has no affiliate programme. Deliberately NOT sent to /sign-in, which is a different account system."
+  },
+  {
+    "from": "/affiliate-registration",
+    "to": "/",
+    "kind": "page",
+    "confidence": "low",
+    "note": "AffiliateWP page; the new shop has no affiliate programme. Deliberately NOT sent to /register, which is a different account system."
+  },
+  {
+    "from": "/datenschutzerklaerung",
+    "to": "/datenschutz",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/elementor-996",
+    "to": "/",
+    "kind": "page",
+    "confidence": "low",
+    "note": "Orphan Elementor draft/template page; content unknown from the sitemap alone."
+  },
+  {
+    "from": "/en/cart",
+    "to": "/en/cart",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/checkout",
+    "to": "/en/cart",
+    "kind": "page",
+    "confidence": "high",
+    "note": "/en/checkout requires a session and 307s to /en/sign-in; /en/cart is a 200 for everyone."
+  },
+  {
+    "from": "/en/contact",
+    "to": "/en/kontakt",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/elementor-1329",
+    "to": "/en",
+    "kind": "page",
+    "confidence": "low",
+    "note": "Orphan Elementor draft/template page; content unknown from the sitemap alone."
+  },
+  {
+    "from": "/en/elementor-1422",
+    "to": "/en",
+    "kind": "page",
+    "confidence": "low",
+    "note": "Orphan Elementor draft/template page; content unknown from the sitemap alone."
+  },
+  {
+    "from": "/en/home-en",
+    "to": "/en",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/my-account",
+    "to": "/en/sign-in",
+    "kind": "page",
+    "confidence": "high",
+    "note": "/account/* requires a session and 307s for anonymous visitors."
+  },
+  {
+    "from": "/en/no-access",
+    "to": "/en/sign-in",
+    "kind": "page",
+    "confidence": "medium",
+    "note": "Restricted-content notice page; sign-in is the nearest intent."
+  },
+  {
+    "from": "/en/privacy",
+    "to": "/en/datenschutz",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/shop-2",
+    "to": "/en/produkte",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/support-en",
+    "to": "/en/support",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/terms-and-conditions",
+    "to": "/en/agb",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/video-en",
+    "to": "/en/support",
+    "kind": "page",
+    "confidence": "medium",
+    "note": "No video route in the frozen route map (O1)."
+  },
+  {
+    "from": "/faq",
+    "to": "/faq",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/geschaeftsbedingungen",
+    "to": "/agb",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/impressum",
+    "to": "/impressum",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/kasse",
+    "to": "/cart",
+    "kind": "page",
+    "confidence": "high",
+    "note": "/checkout requires a session (accounts are mandatory at checkout) and 307s to /sign-in, which would make this a redirect chain. /cart is a 200 for everyone and is the natural entry into checkout."
+  },
+  {
+    "from": "/kontakt-neu",
+    "to": "/kontakt",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/mein-konto",
+    "to": "/sign-in",
+    "kind": "page",
+    "confidence": "high",
+    "note": "/account/* requires a session and 307s for anonymous visitors, so the sign-in page is the only 200 target."
+  },
+  {
+    "from": "/partnerwerkstaetten",
+    "to": "/partner",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/sample-page",
+    "to": "/",
+    "kind": "page",
+    "confidence": "medium",
+    "note": "WordPress default \"Sample Page\"; no equivalent, sent to the home page."
+  },
+  {
+    "from": "/shop",
+    "to": "/produkte",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/support",
+    "to": "/support",
+    "kind": "page",
+    "confidence": "high"
+  },
+  {
+    "from": "/veranstaltungen",
+    "to": "/blog",
+    "kind": "page",
+    "confidence": "medium",
+    "note": "Events page; the new site has no events route, the trade-fair content lives in the blog."
+  },
+  {
+    "from": "/videos",
+    "to": "/support",
+    "kind": "page",
+    "confidence": "medium",
+    "note": "No video route in the frozen route map (O1); support is the closest home for tutorial videos."
+  },
+  {
+    "from": "/warenkorb",
+    "to": "/cart",
+    "kind": "page",
+    "confidence": "high",
+    "note": "Cart keeps the English slug (decision A4)."
+  },
+  {
+    "from": "/5-vario-treffen-2025",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/aaae-messe-globeguard-live-in-australien",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/abenteuer-allrad-2025",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/abenteuer-allrad-2026",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/adventure-southside",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/adventure-southside-2025",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/adventure-southside-2025-2",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/bolliger-hausmesse-mai-2024",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/dubai-4x4-expo",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/f-re-e-2025",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/ineos-riess-globeguard",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/oca-st-gallen",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/oca-st-gallen-2026",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/sprintervan-festival-2026",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/stolzer-sponsor-cape-to-cape-2026-von-der-arktis-bis-nach-afrika",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/suisse-caravan-salon-2024",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/suisse-caravan-salon-2025",
+    "to": "/blog",
+    "kind": "post",
+    "confidence": "low",
+    "note": "The new backend currently has 0 blog posts, so no per-post target exists. Re-point to /blog/<slug> once the post is migrated."
+  },
+  {
+    "from": "/en/produkt/__trashed-2",
+    "to": "/en/products/gg-kab-ad-ts02-084",
+    "kind": "product",
+    "confidence": "medium",
+    "note": "WordPress trashed-slug artefact; live product name is \"Adapter cable TRUCK - MB 14p\", so the target is clear, but decide whether a trashed URL should be redirected at all."
+  },
+  {
+    "from": "/en/produkt/adapter-cable-ive-sgw",
+    "to": "/en/products/gg-sgw-cable-ive",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/cable-adapter-ktm-6p",
+    "to": "/en/products/gg-kab-ad-ts02-091",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/cable-adapter-mb-sprinter-vw-lt-14p",
+    "to": "/en/products/gg-kab-ad-ts02-020b",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/cable-adapter-truma-combi-heaters",
+    "to": "/en/products/gg-cable-truma",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-basic-camper",
+    "to": "/en/produkte/kategorie/basic-womo",
+    "kind": "product",
+    "confidence": "high",
+    "note": "EN \"CAMPER\" = DE \"WoMo\"."
+  },
+  {
+    "from": "/en/produkt/globeguard-basic-car-update-from-2-year",
+    "to": "/en/products/gg-upd-basic-car-jahr",
+    "kind": "product",
+    "confidence": "medium",
+    "note": "Live title says \"GlobeGuard Pro - CAR - Update from the 2. year\" but the slug and its German Polylang pair say BASIC. Mapped to the BASIC update."
+  },
+  {
+    "from": "/en/produkt/globeguard-basic-cars",
+    "to": "/en/produkte/kategorie/basic-car",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-basic-ineos-2",
+    "to": "/en/products/gg-basic-car-ineos",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-basic-motorbike-3",
+    "to": "/en/produkte/kategorie/basic-moto",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-basic-motorcycle-update-from-the-2-year",
+    "to": "/en/products/gg-upd-basic-moto-jahr",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-basic-set-cars-one-restart-update-2",
+    "to": "/en/products/gg-upd-basic-car-reakt",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-pro-cars",
+    "to": "/en/produkte/kategorie/pro-car",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-pro-cars-another-brand",
+    "to": "/en/products/gg-pro-ext-car",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-pro-cars-update-from-2nd-year",
+    "to": "/en/products/gg-upd-pro-car-jahr",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-pro-motorbike",
+    "to": "/en/produkte/kategorie/pro-moto",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-pro-set-cars-one-restart-update-2",
+    "to": "/en/products/gg-upd-pro-car-reakt",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globeguard-pro-truck-bus",
+    "to": "/en/produkte/kategorie/pro-truck",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/globetelematics-2",
+    "to": "/en/produkte",
+    "kind": "product",
+    "confidence": "low",
+    "note": "GlobeTelematics has no successor product or collection in the new catalogue."
+  },
+  {
+    "from": "/en/produkt/remote-diagnsotics",
+    "to": "/en/products/gg-svc-fern",
+    "kind": "product",
+    "confidence": "high",
+    "note": "Typo slug on the old site."
+  },
+  {
+    "from": "/en/produkt/security-gateway-stellantis-2",
+    "to": "/en/products/gg-sgw-lic-stellantis",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/en/produkt/software-update-globeguard-motorbike",
+    "to": "/en/products/gg-pro-ext-moto",
+    "kind": "product",
+    "confidence": "high",
+    "note": "Live name \"GlobeGuard Pro MOTORCYCLE - Another brand\"."
+  },
+  {
+    "from": "/en/produkt/software-update-globeguard-pro-truck-bus-trailer",
+    "to": "/en/products/gg-upd-pro-truck-jahr",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/adapterkabel-ive-sgw",
+    "to": "/products/gg-sgw-cable-ive",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/ferndiagnose-remote-diagnostics",
+    "to": "/products/gg-svc-fern",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-basic-cars-2",
+    "to": "/produkte/kategorie/basic-car",
+    "kind": "product",
+    "confidence": "high",
+    "note": "Old variable set \"GlobeGuard BASIC - CAR\"; successors are 49 per-brand BASIC PKW/VAN products."
+  },
+  {
+    "from": "/produkt/globeguard-basic-ineos",
+    "to": "/products/gg-basic-car-ineos",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-basic-motobike-update-ab-2-jahr",
+    "to": "/products/gg-upd-basic-moto-jahr",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-basic-motorbike",
+    "to": "/produkte/kategorie/basic-moto",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-basic-set-cars-one-restart-update",
+    "to": "/products/gg-upd-basic-car-reakt",
+    "kind": "product",
+    "confidence": "high",
+    "note": "\"ONE RESTART-Update\" = Reaktivierung / Markenwechsel."
+  },
+  {
+    "from": "/produkt/globeguard-basic-womo",
+    "to": "/produkte/kategorie/basic-womo",
+    "kind": "product",
+    "confidence": "high",
+    "note": "Tier page /produkte/womo is the alternative landing."
+  },
+  {
+    "from": "/produkt/globeguard-basis-car-update-ab-2-jahr",
+    "to": "/products/gg-upd-basic-car-jahr",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-pro-cars-2",
+    "to": "/produkte/kategorie/pro-car",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-pro-cars-eine-weitere-marke",
+    "to": "/products/gg-pro-ext-car",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-pro-cars-update-ab-2-jahr",
+    "to": "/products/gg-upd-pro-car-jahr",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-pro-lkw-bus",
+    "to": "/produkte/kategorie/pro-truck",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-pro-motorbike-2",
+    "to": "/produkte/kategorie/pro-moto",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/globeguard-pro-set-cars-one-restart-update",
+    "to": "/products/gg-upd-pro-car-reakt",
+    "kind": "product",
+    "confidence": "high",
+    "note": "\"ONE RESTART update\" = Reaktivierung / Markenwechsel."
+  },
+  {
+    "from": "/produkt/globetelematics",
+    "to": "/produkte",
+    "kind": "product",
+    "confidence": "low",
+    "note": "GlobeTelematics has no successor product or collection in the new catalogue."
+  },
+  {
+    "from": "/produkt/kabeladapter-ktm-6p",
+    "to": "/products/gg-kab-ad-ts02-091",
+    "kind": "product",
+    "confidence": "high",
+    "note": "New name \"Adapter KTM 6p (auf OBD WORLD)\"."
+  },
+  {
+    "from": "/produkt/kabeladapter-mb-sprinter-vw-lt-14p",
+    "to": "/products/gg-kab-ad-ts02-020b",
+    "kind": "product",
+    "confidence": "high",
+    "note": "New name \"Adapter VW LT/MB SPRINTER\"."
+  },
+  {
+    "from": "/produkt/kabeladapter-truck-mb-14p",
+    "to": "/products/gg-kab-ad-ts02-084",
+    "kind": "product",
+    "confidence": "high",
+    "note": "New name \"Adapter MB 14p\"."
+  },
+  {
+    "from": "/produkt/kabeladapter-truma-combi-heizungen",
+    "to": "/products/gg-cable-truma",
+    "kind": "product",
+    "confidence": "high"
+  },
+  {
+    "from": "/produkt/security-gateway-stellantis",
+    "to": "/products/gg-sgw-lic-stellantis",
+    "kind": "product",
+    "confidence": "high",
+    "note": "Durations day/week/month/year are variants of the new product."
+  },
+  {
+    "from": "/produkt/software-update-globeguard-basic-set-motorbike-one",
+    "to": "/products/gg-pro-ext-moto",
+    "kind": "product",
+    "confidence": "high",
+    "note": "Slug says BASIC/update but the live product name is \"GlobeGuard Pro MOTORRAD - Eine weitere Marke\" = PRO Erweiterung."
+  },
+  {
+    "from": "/produkt/software-update-globeguard-basic-set-truck-bus-one",
+    "to": "/products/gg-upd-pro-truck-jahr",
+    "kind": "product",
+    "confidence": "high",
+    "note": "Slug says BASIC but the live product name is \"Software Update GlobeGuard PRO - TRUCK/BUS/TRAILER\"."
+  }
+]
