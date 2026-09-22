@@ -133,9 +133,12 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
       320 px to 1440 px.
 - [~] **Performance pass**. Done: the home-page hero was a CSS background, so every visitor
       downloaded 634 KB at full size on any device; it now goes through `next/image` (17 KB AVIF at
-      640 px) and the deploy fails if optimisation is not working. Still open: font loading, the
-      bundle size of the configurator route, and the 5.2 MB of brand logos in `public/images/brands`
-      (served at 1.5 KB each, so this is repo weight rather than user-facing).
+      640 px) and the deploy fails if optimisation is not working. Fonts need nothing: `next/font`
+      self-hosts Inter and JetBrains Mono with `display: swap`, and the rendered pages make no
+      request to fonts.googleapis.com or fonts.gstatic.com. Still open: the JS bundle of the
+      configurator route (`npm run analyze`), and the 5.2 MB of brand logos in
+      `public/images/brands` — served at about 1.5 KB each, so that one is repo weight rather than
+      anything a visitor feels.
 - [x] **Search index freshness**: `npm run reindex` (polls the job, exits non-zero if it fails or
       the worker is not running). The seeder and the asset importer already queued one; what did not
       was a direct SQL change, which is exactly what went wrong once already.

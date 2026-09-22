@@ -37,6 +37,26 @@ Newest first. Each entry: what was done, how it was verified, what is still open
 - e2e suite re-run after all of it: 16/16. Gates: tsc (app + e2e), eslint, 115 vitest tests,
   next build, backend tsc + build.
 
+- **Docker full stack booted for the first time.** Both images build; the server applied the
+  baseline migration to an empty database and seeded 260 products; five services healthy; shop
+  API 233 products / CHF / de; dashboard and storefront 200; redirects working in the container.
+  Two old warnings are now measured: the Linux dashboard bundle carries the German extension
+  translations a Windows build drops (de.js 74,950 bytes with Blog/FAQ/Bexio strings vs 52,257
+  and none), and ASSET_URL_PREFIX cannot be localhost in compose because next/image fetches it
+  from inside the frontend container — the host IP works from both sides.
+- **The first real `docker compose build` found a broken frontend lockfile.** npm 11 (Node 24,
+  this machine) wrote a lock that npm 10 (Node 22, the images and both CI workflows) rejects over
+  an unmet @swc/helpers peer. Nothing local reproduced it; it would have broken Docker, CI and
+  the Hetzner deploy at once. Regenerated with the image's own npm, `npm ci` then verified under
+  node:22 for both repos.
+- **The Docker build context was 316 MB and included `backups/`** — gzipped pg_dump output with
+  customer data, heading into an image layer. Now 100 KB.
+- **Redis-backed rate limiter** for the public trackOrder query, so the limit holds across server
+  processes instead of being multiplied by their number. Proven against a real Redis.
+- **Accessibility**: `npm run audit:a11y` over twelve pages found four real problems (no skip
+  link, three pages without a `<main>` landmark, two h1 on the cart, footer h4 jumping h1 → h4).
+  All fixed; the audit reports the set clean and exits non-zero on a regression.
+
 ### Still blocked
 - Hetzner publish: the `drivkf` SSH password and the managed Postgres password are not on this
   machine, there is no SSH key, and the only stored Hetzner credentials belong to the `globewp`

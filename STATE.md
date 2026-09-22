@@ -116,15 +116,19 @@ logs stay out (the Bexio export in `reference/` is customer data).
 - The public `trackOrder` rate limit is shared through Redis, so it holds across server processes
   instead of being multiplied by their number; it degrades to a per-process window if Redis goes.
 
+- **Docker full stack boots**: both images build, the server migrates and seeds, all five
+  services healthy, redirects working in the container. The Linux dashboard bundle carries the
+  German extension translations a Windows build drops. Remember the compose Postgres publishes
+  host port 5432 and collides with the portable one — stop that first.
+- The structural accessibility pass is done (`npm run audit:a11y`, twelve pages clean).
+
 ### Next
 
-1. **Docker full-stack first boot** — Docker Desktop + WSL2 work (engine 29.8.0, Linux containers,
-   12 CPU, 7.9 GB) and `docker compose config` validates (5 services). Still to do: build both
-   images and run the first-boot recipe, and confirm the Linux-built dashboard bundle carries the
-   German admin translations. The compose Postgres publishes host port 5432 and collides with the
-   portable PostgreSQL — stop that one first.
-2. Accessibility and responsive pass; the rest of the performance pass (fonts, configurator
-   bundle). Browser QA with the Chrome extension.
+1. Browser QA with the Chrome extension: keyboard focus order and traps, colour contrast, and
+   the responsive pass from 320 px to 1440 px. The structural half is already covered by
+   `npm run audit:a11y`.
+2. The JS bundle of the configurator route (`npm run analyze`). Fonts need nothing — next/font
+   self-hosts them and no page requests fonts.googleapis.com.
 3. **Blocked on the owner**: Hetzner `drivkf` SSH + managed-Postgres passwords (the beta publish
    waits only on these), the GitHub destination for all three repos, how the beta database should
    meet the baseline, the Mollie test key, legal texts, decisions B1–B14.
