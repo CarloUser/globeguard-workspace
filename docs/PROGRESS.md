@@ -2,6 +2,46 @@
 
 Newest first. Each entry: what was done, how it was verified, what is still open. See MERGE-PLAN.md for the plan and DECISIONS.md for owner decisions.
 
+## 2026-09-22 (day 2, later)
+
+### Done
+- **Everything committed, in three repos.** `C:\GlobeGuard` itself is now a git repo (STATE.md,
+  docs/, docker-compose.yml, .env.example, README) — those files were the project memory and
+  existed on one machine only. `reference/` stays untracked: it holds a Bexio customer address
+  export and the owner's price masters.
+- **Go-live workflow findings applied** (3 major, 7 minor). The schema policy is now enforced,
+  not defaulted: APP_ENV is validated against a list (a typo like `produciton` used to read as
+  "not production" and would have synchronised a production database) and DB_SYNCHRONIZE=true is
+  refused when APP_ENV=production. Docker runs `node dist/migrate.js && node dist/index.js`.
+  deploy-beta.mjs installs sharp before the migration so migrate and restart stay contiguous, and
+  a missing `ss` on the host is fatal rather than "nothing to stop". Backup/restore: no silent
+  fall-back to another database's dump, a maintenance-database probe that degrades, and both
+  completions awaited instead of nested. Re-proven end to end: dump -> restore into a scratch
+  database -> identical row counts (product 260, order 62, asset 125, customer 28) -> dropped.
+- **`npm run db:adopt-baseline`** — found while testing: a database built by synchronize fails the
+  baseline with `relation "collection_asset" already exists`. migrate.js exits 1 (so the deploy
+  stops safely) but then printed "No pending migrations found.", which reads like success. Both
+  fixed. The beta needs an owner decision first (GO-LIVE section 1).
+- **Redirects live**: 203 map entries wired into next.config.ts, verified against a running build
+  with `npm run verify:redirects` (also the cutover check). Two bugs found doing it, both now
+  build-time guards: identity entries made /faq, /impressum and /support return
+  ERR_TOO_MANY_REDIRECTS, and `/en/checkout -> /en/cart` (true of the old site) made the new
+  English checkout unreachable — caught by the e2e suite.
+- **Product + BreadcrumbList JSON-LD** on product pages, AggregateOffer for the four products
+  that show a price range. Verified against the shop API.
+- **Hero image**: was a CSS background, so next/image never saw it — 634 KB per visitor at full
+  size on a phone. Now 17 KB AVIF at 640 px. Along the way: when sharp cannot load, next/image
+  silently serves the originals, which is what the local bundle had been doing; the deploy now
+  fails on that.
+- **`npm run reindex`** for the search index, with the "no worker running" case spelled out.
+- e2e suite re-run after all of it: 16/16. Gates: tsc (app + e2e), eslint, 115 vitest tests,
+  next build, backend tsc + build.
+
+### Still blocked
+- Hetzner publish: the `drivkf` SSH password and the managed Postgres password are not on this
+  machine, there is no SSH key, and the only stored Hetzner credentials belong to the `globewp`
+  production WordPress account, which must not be touched.
+- GitHub push: no `gh` CLI, no credential helper, repo names unconfirmed.
 ## 2026-09-22 (day 2)
 
 ### Done

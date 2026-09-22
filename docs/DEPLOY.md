@@ -322,6 +322,64 @@ A code rollback does not undo a migration or the USD→CHF price relabel. For th
 - The proxy passes `HOSTNAME=0.0.0.0` to the frontend as specified; `FRONTEND_HOSTNAME=127.0.0.1` in the konsoleH env is the tighter choice on the shared host, since only the supervisor needs to reach `:8080`.
 
 
+## Images (why a correct-looking page can still be ten times too heavy)
+
+Everything the storefront renders goes through `next/image`, including the home-page hero. That
+only pays off if **sharp can load in the running bundle**. When it cannot, Next does not fail: it
+passes the original bytes through, so the page looks perfect while every visitor downloads the
+full-size file.
+
+Measured on the local production build (`w=640`, `Accept: image/avif`):
+
+| | source | served |
+|---|---|---|
+| hero `hero-banner-bg.jpg` | 634 KB | **17.3 KB** AVIF (32 KB at 1080, 64 KB as JPEG without AVIF/WebP) |
+| brand logo `seat.png` | 588 KB | **1.5 KB** |
+| a Vendure product preview | 34 KB | **2.2 KB** |
+
+So the difference between sharp working and sharp silently failing on the home page alone is
+roughly 630 KB per visit.
+
+`deploy/deploy-beta.mjs` step 6 now checks this directly: it fetches the hero through
+`/_next/image` and fails the deploy if the answer is not smaller than the source. The deploy also
+installs a Linux sharp into the frontend release (`--skip-sharp` turns that off).
+
+Local Windows gotcha: `next build` traces `@img/sharp-win32-x64/lib/sharp-win32-x64.node` into
+`.next/standalone` but **not** the two `libvips-*.dll` files next to it, so a standalone bundle run
+from `.next/standalone` cannot load sharp and serves originals. Copy them once after a build:
+
+```bash
+cp node_modules/@img/sharp-win32-x64/lib/*.dll .next/standalone/node_modules/@img/sharp-win32-x64/lib/
+rm -rf .next/standalone/.next/cache/images        # the pass-through answers were cached
+```
+
+Linux is unaffected (the `.so` files live inside the package that the deploy installs).
+
+## Search index (why a page can show stale data that the database does not have)
+
+The storefront's collection pages, `/search` and the related-products strip read Vendure's search
+index, not the product tables. Three things keep it current by themselves:
+
+- the catalogue seeder queues a full reindex at the end of every seed run;
+- `scripts/sync-product-assets.mjs` queues one after importing images;
+- anything edited through the dashboard or the Admin API updates the index by event.
+
+What does **not** update it is a change written straight to the database. This project has already
+been bitten once: the SQL that repaired asset identifiers uploaded on Windows (backslashes in
+`asset.source` / `asset.preview`) left every collection page serving the old previews until the
+index was rebuilt. A database restore into a running stack has the same effect.
+
+```bash
+npm run reindex                 # rebuild and wait (exit 0 only when the job COMPLETED)
+npm run reindex -- --no-wait    # queue it and return
+ADMIN_API=https://driv.beta.globeguard.ch/admin-api npm run reindex
+```
+
+`scripts/reindex-search.mjs` logs in with `SUPERADMIN_USERNAME` / `SUPERADMIN_PASSWORD`, polls the
+job and fails loudly if it is still queued after `REINDEX_TIMEOUT_MS` (default 10 min) — which
+almost always means the **worker is not running**: reindex is a job, and without a worker it waits
+for ever. Local run: 272 items.
+
 ## Proxy hop count (rate limiter correctness)
 
 `TRUST_PROXY_HOPS` tells Vendure how many reverse proxies sit between the client and the backend process (Express `trust proxy`). The public `trackOrder` rate limiter keys on the resulting `req.ip`, so a wrong value either throttles every visitor together (too few hops trusted) or lets clients spoof their IP (too many). Beta/Hetzner: 1 (the supervisor). Docker stack: 1 if an ingress sits in front of the server container, otherwise unset. Local dev: unset. Staging check: look up one order code from two different client IPs; both must return `null` before either is throttled.
@@ -396,6 +454,54 @@ Two plugins are registered conditionally and are therefore **not** in the baseli
 Both are off on the beta and in production (decision A10), which is exactly the shape the baseline was generated in. Turning either on in an environment that runs migrations needs its own generated migration first (D.4) — otherwise the plugin boots against tables that do not exist. The Bexio **custom fields** on `customer` and `order` are always registered and are already in the baseline, so that flag can be toggled without any schema change.
 
 Generated migrations are never hand-edited. A change to an entity gets a new migration.
+
+### D.3a Adopting a database that `synchronize` built (first deploy only)
+
+Every GlobeGuard database that existed before the baseline was written was built by `synchronize`
+and has no `migrations` table: the local `globeguard` database and — importantly — **the Hetzner
+beta**. Running `node dist/migrate.js` against such a database tries to create tables that are
+already there:
+
+> **The beta needs a decision before it needs this procedure.** Its schema was synchronized from
+> the *pre-merge* entities, so it is not the baseline and adoption alone would be a false claim.
+> `deploy/beta-checklist.md` section A3a states the two paths (rebuild from the baseline —
+> recommended — or restore, catch up and generate a catch-up migration). Adoption applies to a
+> database whose schema already **is** the baseline.
+
+```
+Migration "Baseline1790095839585" failed, error: relation "collection_asset" already exists
+An error occurred when running migrations:
+```
+
+That is the safe outcome — `migrate.js` exits **1**, so `deploy/deploy-beta.mjs` (`set -euo
+pipefail`) and the Docker `node dist/migrate.js && node dist/index.js` chain both stop before
+anything is restarted. It is still a deploy that has to be repaired by hand, so do the adoption
+**before** the first scripted deploy:
+
+```bash
+npm run db:backup                              # always first
+npm run db:adopt-baseline                      # dry run: checks, writes nothing
+npm run db:adopt-baseline -- --yes             # records the baseline as applied
+node dist/migrate.js                           # expect "No pending migrations found."
+```
+
+`scripts/db-adopt-baseline.mjs` writes exactly one row into `migrations`, and only after proving
+the claim: all 89 baseline tables must be present (extra tables — the env-gated `bexio_*` and
+`cups_configuration` — are reported and left alone), and the `migrations` table must be empty or
+already hold the baseline. It refuses on an empty database (run the migration for real instead)
+and on a database that carries a different migration history. Re-running it is a no-op.
+
+On the beta this runs once, on the host, inside the release directory:
+
+```bash
+cd ~/globeguard/releases/<stamp>/backend
+npm run db:backup
+node scripts/db-adopt-baseline.mjs             # read the output
+node scripts/db-adopt-baseline.mjs --yes
+```
+
+Only the `pg` package is needed, which `npm ci --omit=dev` already installs — unlike `db-backup`,
+this does not need a `psql` or `pg_dump` binary on the host.
 
 ### D.4 Generating the next migration
 

@@ -213,12 +213,39 @@ site — only one needs migrating; the other should redirect to it.
 
 ---
 
-## 6. How to apply the map later
+## 6. How the map is applied
 
-### 6.1 Generate `redirects()` from the JSON
+> **Done, 2026-09-22.** The map lives in the storefront repo at
+> `globeguard-frontend/src/data/redirect-map.json` and `next.config.ts` turns it into 202 rules at
+> build time (198 from the map + 4 for the old sitemaps). All 203 entries were verified against a
+> running production build with `npm run verify:redirects`, which is the cutover check too:
+>
+> ```bash
+> npm run verify:redirects                          # default http://localhost:3200
+> npm run verify:redirects -- https://globeguard.ch  # on cutover day
+> ```
+>
+> Three things the first implementation got wrong, all caught by that check and now guarded:
+>
+> 1. **Identity entries are not redirects.** Five URLs the new site kept unchanged (`/`, `/faq`,
+>    `/impressum`, `/support`, `/en/cart`) are in the map as documentation. Emitted as rules they
+>    redirect to themselves, and `/faq` really did return `ERR_TOO_MANY_REDIRECTS`. They are now
+>    skipped, and the verifier asserts they answer **200**.
+> 2. **A chained redirect fails the build.** If an entry's destination is itself another entry's
+>    source, `next.config.ts` throws with the offending chain rather than shipping it.
+> 3. **`statusCode: 301`, not `permanent: true`** (which is 308) — this is a search-engine
+>    migration, and 301 is what every crawler and legacy client already understands.
+>
+> Two behaviours are expected and intentional: the trailing-slash form the old site served resolves
+> in **two hops** (Next's own 308 slash-strip, then the 301), and the five Download-Monitor query
+> URLs keep their query string on the way to `/support`, which the page ignores.
+>
+> Still open for cutover: submit `/sitemap.xml` in Search Console (section 6.2).
 
-The storefront's `next.config.ts` has no `redirects()` yet. Add one that reads the JSON at build
-time, so the map stays the single source of truth:
+### 6.1 How `redirects()` is generated (for reference)
+
+`next.config.ts` reads the JSON at build time, so the map stays the single source of truth. The
+shape is:
 
 ```ts
 // next.config.ts
@@ -273,18 +300,14 @@ PY
 
 ### 6.2 Keep the old sitemap URL responding
 
-**`https://globeguard.ch/wp-sitemap.xml` must not 404 after the cutover.** Google re-fetches the
-submitted sitemap for a long time, and a 404 there slows down the discovery of the new URLs.
-Either:
+**Done.** `/wp-sitemap.xml`, `/en/wp-sitemap.xml` and every child sitemap
+(`/wp-sitemap-posts-product-1.xml`, `/en/wp-sitemap-taxonomies-product_cat-1.xml`, …) now 301 to
+`/sitemap.xml` through two wildcard rules in `next.config.ts`. They are deliberately not in
+`redirect-map.json` — they are infrastructure, not content — and the verifier checks all four
+shapes on every run.
 
-- redirect `/wp-sitemap.xml` (and the 15 child sitemaps, all of which are currently indexed) to the
-  new `/sitemap.xml`; **or**
-- serve the new sitemap's content at the old path.
-
-Do **not** let the child sitemap paths (`/wp-sitemap-posts-product-1.xml`,
-`/en/wp-sitemap-taxonomies-product_cat-1.xml`, …) simply disappear. They are deliberately excluded
-from `redirect-map.json` because they are infrastructure, not content — handle them in the same
-change that adds `redirects()`.
+The reason it matters: Google re-fetches a submitted sitemap for a long time, and a 404 there slows
+down discovery of the new URLs.
 
 Also submit the new `/sitemap.xml` in Search Console on cutover day and keep the old property's
 data for the comparison.

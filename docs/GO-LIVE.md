@@ -27,8 +27,18 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
       "no payment method available" and the checkout cannot be finished end to end. A test key is
       enough to prove the flow; the live key is a separate item in section 5.
 - [ ] **GitHub destination** (Owner). Decide the repository names under `CarloUser` for the merged
-      backend and frontend, and give this machine push access (no `gh` CLI and no stored git
-      credentials are present). Until then both repos exist only locally, fully committed.
+      backend and frontend — and now also for the workspace repo (`C:\GlobeGuard`, which holds
+      STATE.md, the docs and docker-compose.yml) — and give this machine push access (no `gh` CLI
+      and no stored git credentials are present). Until then all three repos exist only locally,
+      fully committed.
+- [ ] **How the beta database meets the baseline** (Owner decision, then Assistant). The beta was
+      built by `synchronize` from the *pre-merge* entities, so it is neither under migration control
+      nor at the baseline schema; the first deploy stops at the migration step until this is
+      settled. Two paths, both written up in `deploy/beta-checklist.md` A3a: rebuild the beta
+      database from the baseline and re-seed (recommended — it makes the beta exactly what
+      production will be, but destroys the existing beta catalogue and beta orders), or keep the
+      data and generate a reviewed catch-up migration. Beta orders are test data, but it is your
+      call.
 
 ---
 
@@ -87,34 +97,44 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
 
 ## 4. Technical work the assistant can finish without you
 
-- [~] **Baseline migration and synchronize policy**, backup and restore tooling. Being generated and
-      verified right now; see `DEPLOY.md` section "Database" once it lands.
-- [~] **CI workflows** for both repos (typecheck, lint, tests, build, backend boot smoke). Written
-      in this round, pending verification. They cannot run until the repos are on GitHub.
-- [~] **Parameterised beta deploy script** with a dry run, rollback and post-deploy verification.
-      Written in this round, dry run pending verification; the real run needs the Hetzner password.
-- [~] **End-to-end test suite** (Playwright) for the storefront flows: 8 specs written (home, BASIC
-      and PRO pickers, WoMo and ELITE, cart, checkout, account/locale, tracking); the first full run
-      and the independent re-run are in progress.
+- [x] **Baseline migration and synchronize policy**, backup and restore tooling. 89 tables,
+      648 columns, generated against an empty database and diffed against the live one.
+      `APP_ENV` is validated and `DB_SYNCHRONIZE=true` is refused in production. `npm run db:backup`
+      / `db:restore` / `db:adopt-baseline`. See `DEPLOY.md` section "Database".
+- [x] **CI workflows** for both repos (typecheck, lint, tests, build, migrate, backend boot smoke).
+      YAML and shell verified locally; `npm ci` proven from a clean tree. They only *run* once the
+      repos are on GitHub (section 1).
+- [x] **Parameterised beta deploy script** with a dry run, rollback and post-deploy verification
+      (now including a check that `next/image` is not silently serving unoptimised originals). The
+      real run needs the Hetzner password.
+- [x] **End-to-end test suite** (Playwright): 16 specs, all green. It has already paid for itself —
+      it caught the duplicate checkout DOM ids, the missing `languageCode`, and the redirect rule
+      that made the English checkout unreachable.
 - [ ] **Docker full-stack first boot**: build both images, run the documented first-boot recipe,
       confirm the dashboard bundle built on Linux contains the German admin translations (a Windows
-      build silently drops them).
-- [x] **301 redirect map from the old WooCommerce URLs**: `redirect-map.json` (203 URLs) and
-      `redirect-map.md`. All 83 distinct targets verified as 200 on the new storefront. Still to do:
-      wire it into `next.config.ts` (the file has a ready-to-paste `redirects()`), keep
-      `/wp-sitemap.xml` and its 15 child sitemaps responding after cutover, and handle the five
-      Download-Monitor query-string URLs with a `has` matcher.
-- [ ] **Product JSON-LD** on product pages (the builder exists but is not wired).
+      build silently drops them). `docker compose config` passes; the images have not been built.
+      Note the compose Postgres publishes host port 5432 and collides with the portable one.
+- [x] **301 redirect map from the old WooCommerce URLs**, wired into `next.config.ts`: 203 entries →
+      197 rules plus 4 for `/wp-sitemap*.xml`, the five Download-Monitor query URLs handled with a
+      `has` matcher, and 6 URLs deliberately left to the storefront. Two build-time guards (no
+      chained redirect, no rule over a route the app serves) plus `npm run verify:redirects`, which
+      is also the cutover check against the real host.
+- [x] **Product JSON-LD** on product pages, with an AggregateOffer for the four products that show a
+      price range, plus BreadcrumbList. Verified against the shop API.
 - [ ] **Accessibility and responsive pass** over the new pages (keyboard paths, contrast, 320 px to
       1440 px), with fixes.
-- [ ] **Performance pass**: image sizes (the hero is a 649 KB JPEG named `.png`), font loading,
-      bundle size of the configurator route.
-- [ ] **Search index freshness**: the collection and search pages read Vendure's search index, so a
-      reindex has to run after every catalogue import. Wire it into the seed and import scripts.
+- [~] **Performance pass**. Done: the home-page hero was a CSS background, so every visitor
+      downloaded 634 KB at full size on any device; it now goes through `next/image` (17 KB AVIF at
+      640 px) and the deploy fails if optimisation is not working. Still open: font loading, the
+      bundle size of the configurator route, and the 5.2 MB of brand logos in `public/images/brands`
+      (served at 1.5 KB each, so this is repo weight rather than user-facing).
+- [x] **Search index freshness**: `npm run reindex` (polls the job, exits non-zero if it fails or
+      the worker is not running). The seeder and the asset importer already queued one; what did not
+      was a direct SQL change, which is exactly what went wrong once already.
 - [ ] **Redis-backed rate limiter** for the public order-tracking query before the backend ever runs
       as more than one process.
 - [ ] **Beta hostname noindex check** after the first beta deploy (the storefront already returns a
-      disallow-all robots.txt when the site URL contains `beta.`).
+      disallow-all robots.txt when the site URL contains `beta.`; the deploy script asserts it).
 
 ---
 

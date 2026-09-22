@@ -97,22 +97,37 @@ and category route; cart with selection badges and SGW removal dialog; Mollie ch
 home page; order tracking; sitemap. Gates green: typecheck, lint, 109 tests, build, standalone
 runtime smoke in both locales, backend contract verified by curl.
 
-### In flight / next
+### Also done and committed (2026-09-22, later)
 
-1. **Playwright end-to-end suite** (Phase 3) — the click-through flows a browser must prove:
-   picker navigation, SGW dialog, quantity/duration totals, add-to-cart, cart dialog, checkout
-   steps, tracking. The workflow was written and launched twice; the first run died on a session
-   limit, the second on usage credits. Re-run it (see §6).
-2. **Docker stack validation** — Docker Desktop + WSL2 work since 2026-09-22 (engine 29.8.0, Linux
-   containers, 12 CPU, 7.9 GB). `docker compose config` on `C:/GlobeGuard/docker-compose.yml`
-   validates (5 services). Still to do: build both images and run the first-boot recipe. Note that
-   the compose Postgres publishes host port 5432 and collides with the portable PostgreSQL — stop
-   that one first (or change the published port).
-3. Browser QA with the Chrome extension (extension was not connected in the last session).
-4. Remaining owner items: Mollie test key, Hetzner `drivkf` SSH + managed-Postgres passwords,
-   legal texts, pre-go-live decisions B1–B14. **The full launch to-do list is `docs/GO-LIVE.md`** —
-   every open item, marked owner or assistant. Publishing to the beta is blocked only by the two
-   Hetzner passwords; the deploy script, checklist and path-aware supervisor are ready.
+The workspace itself is a **third git repository** now: `C:\GlobeGuard` tracks STATE.md, `docs/`,
+`docker-compose.yml`, `.env.example` and a README. `reference/`, `.tools/`, `.env` and the run
+logs stay out (the Bexio export in `reference/` is customer data).
+
+- Schema policy is **enforced**: `APP_ENV` is validated against `development|dev|test|production`
+  and `DB_SYNCHRONIZE=true` is refused when `APP_ENV=production`. Baseline migration (89 tables)
+  plus `npm run db:backup` / `db:restore` / `db:adopt-baseline`, all proven against a restored
+  copy of the live database. Docker runs `node dist/migrate.js && node dist/index.js`.
+- CI workflows for both repos; `npm ci` proven from a clean tree.
+- Beta deploy script finished, dry run clean, and it now fails the deploy if `next/image` is
+  serving unoptimised originals.
+- **16 Playwright specs, all green** (§6).
+- 203 WooCommerce URLs redirect for real (`npm run verify:redirects`), Product/Breadcrumb JSON-LD,
+  the hero cut from 634 KB to 17 KB, `npm run reindex` for the search index.
+
+### Next
+
+1. **Docker full-stack first boot** — Docker Desktop + WSL2 work (engine 29.8.0, Linux containers,
+   12 CPU, 7.9 GB) and `docker compose config` validates (5 services). Still to do: build both
+   images and run the first-boot recipe, and confirm the Linux-built dashboard bundle carries the
+   German admin translations. The compose Postgres publishes host port 5432 and collides with the
+   portable PostgreSQL — stop that one first.
+2. Accessibility and responsive pass; the rest of the performance pass (fonts, configurator
+   bundle). Browser QA with the Chrome extension.
+3. Redis-backed rate limiter for `trackOrder` before the backend runs as more than one process.
+4. **Blocked on the owner**: Hetzner `drivkf` SSH + managed-Postgres passwords (the beta publish
+   waits only on these), the GitHub destination for all three repos, how the beta database should
+   meet the baseline, the Mollie test key, legal texts, decisions B1–B14.
+   **The full launch to-do list is `docs/GO-LIVE.md`.**
 
 ---
 
@@ -163,21 +178,34 @@ If the engine reports "Docker Desktop is unable to start", kill `Docker Desktop`
 
 | URL | What |
 |---|---|
-| http://localhost:3001 | storefront, **dev server** — use this for browsing, product images work |
-| http://localhost:3200 | storefront, production standalone build (what the e2e suite drives) |
+| http://localhost:3200 | storefront, **production standalone build** — browse here; what the e2e suite drives |
+| http://localhost:3001 | storefront, dev server (HMR); heavy on RAM, it is the first thing to die |
 | http://localhost:3000/dashboard | Vendure admin (user `superadmin`, password in `globeguard-backend/.env`) |
 | http://localhost:3000/mailbox | dev mailbox: every e-mail the shop sends |
 | http://localhost:3000/shop-api | GraphQL shop API |
 
-Product images are served by the backend at `http://localhost:3000/assets/...`. On the production
-build (3200) `next/image` refuses to optimise them because the host is a private IP, so they return
-400; the dev server allows it. In a real deployment `NEXT_PUBLIC_ASSET_HOST` is a real hostname and
-the problem disappears.
+Product images are served by the backend at `http://localhost:3000/assets/...`. For the standalone
+build on 3200, two things have to be right or images break in ways that are easy to miss:
 
-After changing catalogue data or fixing asset paths, trigger a search reindex through the admin API
-(`mutation { reindex { id state } }` with a superadmin bearer token), otherwise listing pages keep
-serving stale products and stale image paths. The search index, not the database, feeds the
-collection and search pages.
+```bash
+# build with this, or next/image returns 400 for a private-IP upstream in a production build
+ALLOW_LOCAL_IMAGE_HOSTS=true NEXT_PUBLIC_SITE_URL=http://localhost:3200 npx next build
+
+# Windows only: next build traces the sharp .node binary into .next/standalone but NOT the
+# libvips DLLs beside it. Without them sharp cannot load and next/image SILENTLY serves the
+# originals — the page looks right and weighs ten times too much.
+cp node_modules/@img/sharp-win32-x64/lib/*.dll .next/standalone/node_modules/@img/sharp-win32-x64/lib/
+rm -rf .next/standalone/.next/cache/images        # the pass-through answers were cached
+```
+
+Check it with `curl -s -o /dev/null -w '%{size_download}\n' -H 'Accept: image/avif'
+'http://localhost:3200/_next/image?url=%2Fhero-banner-bg.jpg&w=640&q=75'` — about 17'000, not
+649'279. In a real deployment `NEXT_PUBLIC_ASSET_HOST` is a real hostname and the deploy script
+asserts the same thing.
+
+After changing catalogue data or fixing asset paths, run `npm run reindex` in the backend (it polls
+the job and fails if the worker is not running), otherwise listing pages keep serving stale products
+and stale image paths. The search index, not the database, feeds the collection and search pages.
 
 ---
 
@@ -230,6 +258,15 @@ ids collided) and the checkout page querying the active order and the customer a
 - **Windows asset paths**: Vendure stores asset identifiers with backslashes when uploaded on
   Windows. Fix after an import:
   `UPDATE asset SET source = replace(source, chr(92), '/'), preview = replace(preview, chr(92), '/');`
+  Then `npm run reindex` — SQL straight into the database does not touch the search index, and the
+  listing pages read the index.
+- **A database built by `synchronize` cannot run the baseline migration**: it fails with
+  `relation "collection_asset" already exists` and exits 1. That is the safe outcome, not a bug.
+  Adopt it once with `npm run db:adopt-baseline -- --yes` (it verifies the schema first). The beta
+  needs an owner decision before that, because its schema predates the merge — see GO-LIVE §1.
+- **Writing scripts through a Bash heredoc halves backslashes** in this environment: `\\n` inside a
+  JS template literal arrives as a real newline and silently breaks the file. Use the Write tool for
+  script files, or a Python heredoc.
 - **Windows dashboard build**: the upstream Vite translations plugin globs with backslashes, so a
   dashboard bundle built on Windows contains no extension translations. Build it on Linux
   (Docker/Hetzner) for production.
