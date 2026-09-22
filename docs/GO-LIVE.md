@@ -125,8 +125,12 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
       is also the cutover check against the real host.
 - [x] **Product JSON-LD** on product pages, with an AggregateOffer for the four products that show a
       price range, plus BreadcrumbList. Verified against the shop API.
-- [ ] **Accessibility and responsive pass** over the new pages (keyboard paths, contrast, 320 px to
-      1440 px), with fixes.
+- [~] **Accessibility**: the structural pass is done and `npm run audit:a11y` keeps it that way
+      (twelve pages, exits non-zero on a finding). It found and fixed four real problems: no skip
+      link anywhere, three pages with no `<main>` landmark, two `<h1>` on the cart, and footer
+      headings as `h4` so every page jumped h1 → h4. Still open, because they need a real browser
+      and a person: keyboard focus order and traps, colour contrast, and the responsive pass from
+      320 px to 1440 px.
 - [~] **Performance pass**. Done: the home-page hero was a CSS background, so every visitor
       downloaded 634 KB at full size on any device; it now goes through `next/image` (17 KB AVIF at
       640 px) and the deploy fails if optimisation is not working. Still open: font loading, the
