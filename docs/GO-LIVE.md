@@ -131,8 +131,11 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
 - [x] **Search index freshness**: `npm run reindex` (polls the job, exits non-zero if it fails or
       the worker is not running). The seeder and the asset importer already queued one; what did not
       was a direct SQL change, which is exactly what went wrong once already.
-- [ ] **Redis-backed rate limiter** for the public order-tracking query before the backend ever runs
-      as more than one process.
+- [x] **Redis-backed rate limiter** for the public order-tracking query: the window is shared
+      through Redis when one is configured (the same connection profile the cache uses), so the
+      limit holds across server processes instead of being multiplied by their number. Falls back
+      to a per-process window if Redis goes away. Proven against a real Redis with two limiter
+      instances standing in for two replicas.
 - [ ] **Beta hostname noindex check** after the first beta deploy (the storefront already returns a
       disallow-all robots.txt when the site URL contains `beta.`; the deploy script asserts it).
 

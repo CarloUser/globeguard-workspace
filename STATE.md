@@ -267,6 +267,16 @@ ids collided) and the checkout page querying the active order and the customer a
 - **Writing scripts through a Bash heredoc halves backslashes** in this environment: `\\n` inside a
   JS template literal arrives as a real newline and silently breaks the file. Use the Write tool for
   script files, or a Python heredoc.
+- **Docker CLI is not on PATH** (per-user install). Put the whole directory on PATH, not just
+  `docker.exe`: `export PATH="$LOCALAPPDATA/Programs/DockerDesktop/resources/bin:$PATH"`.
+  Calling the exe by its full path makes builds fail with
+  `error getting credentials - docker-credential-desktop: executable file not found`, because
+  the credential helper lives in that same directory. Under Git Bash also
+  `export MSYS_NO_PATHCONV=1`, or `-v C:/x:/app -w /app` is mangled into a Git install path.
+- **npm 11 here, npm 10 in the images**: this machine is Node 24, the Docker images and both CI
+  workflows are Node 22. A lockfile written by npm 11 can be rejected by npm 10 over an unmet
+  peer dependency, and nothing local reproduces it. Regenerate locks with the image's npm:
+  `docker run --rm -v C:/GlobeGuard/<repo>:/app -w /app node:22-bookworm-slim npm install --package-lock-only`.
 - **Windows dashboard build**: the upstream Vite translations plugin globs with backslashes, so a
   dashboard bundle built on Windows contains no extension translations. Build it on Linux
   (Docker/Hetzner) for production.
