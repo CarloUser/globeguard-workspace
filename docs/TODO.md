@@ -1,19 +1,38 @@
-# Go-live to-do list
+# Shared to-do
 
 Everything still open between the current state and a public launch of the merged shop on
-globeguard.ch. Work through it in any order inside a section; the sections are ordered by how much
-they block everything else.
+globeguard.ch. **This file is the hand-over between everyone working on the project** — read it
+after you pull, update it before you push. Sections are ordered by how much they block
+everything else; inside a section the order does not matter.
 
-Legend: `[ ]` open, `[x]` done, `[~]` partly done (detail in the note).
-**Owner** = only you can do it (credentials, business facts, legal, money).
-**Assistant** = can be done without you; ask for it in a new chat.
+## How to use this file
 
-Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions are in
-`DECISIONS.md`; the open pre-go-live questions from the merge plan keep their B-numbers here.
+1. **Before you start**, add a row to "Who is on what" below so nobody duplicates your work.
+2. **When you finish**, mark the item `[x]` and append `— @you, YYYY-MM-DD`, then delete your
+   row. Leave the finished item where it is: the note explains what the next person inherits.
+3. **When you find something new**, add a `[ ]` item to the right section rather than fixing it
+   silently — the other person may already be on it.
+4. One item per bullet, and keep your edits inside your own bullets. Two people editing separate
+   bullets merge cleanly; two people rewriting the same paragraph do not.
+
+Markers: `[ ]` open · `[~]` partly done, the note says what is left · `[x]` done.
+Roles: **Owner** = only Carlo can do it (credentials, business facts, legal, money).
+**Dev** = any developer, including an AI assistant in a new chat.
+
+## Who is on what
+
+| Person | Item | Since |
+|---|---|---|
+| _(nobody yet)_ | | |
+
+Related reading: `STATE.md` is the state of the build, `docs/PROGRESS.md` is the narrative log of
+what was done and how it was verified, `docs/DECISIONS.md` holds the decisions already locked
+(check it before changing behaviour), and `ONBOARDING.md` gets a new machine running.
+The open pre-go-live questions from the merge plan keep their B-numbers here.
 
 ---
 
-## 1. Blocked right now (owner input needed before anything else moves)
+## 1. Blocked right now (Owner input needed before anything else moves)
 
 - [ ] **Hetzner beta credentials** (Owner). The merged stack cannot be published to
       `driv.beta.globeguard.ch` without them. Needed: the SSH password for user `drivkf` on
@@ -26,12 +45,25 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
 - [ ] **Mollie account and test key** (Owner). Until `MOLLIE_API_KEY` exists, private customers see
       "no payment method available" and the checkout cannot be finished end to end. A test key is
       enough to prove the flow; the live key is a separate item in section 5.
-- [ ] **GitHub destination** (Owner). Decide the repository names under `CarloUser` for the merged
-      backend and frontend — and now also for the workspace repo (`C:\GlobeGuard`, which holds
-      STATE.md, the docs and docker-compose.yml) — and give this machine push access (no `gh` CLI
-      and no stored git credentials are present). Until then all three repos exist only locally,
-      fully committed.
-- [ ] **How the beta database meets the baseline** (Owner decision, then Assistant). The beta was
+- [ ] **Push the three repos to GitHub** (Owner). Nothing is on GitHub yet, so nobody else can
+      clone it. All three are fully committed locally and each needs a different decision:
+      - `globeguard-backend` — the easy one. It already has `origin`
+        `CarloUser/globeguard-backend` and is **18 commits ahead** of it on the same history, so
+        `git push` is a plain fast-forward. (Fetch first in case the remote moved.)
+      - `globeguard-frontend` — **decide first.** It was started fresh from the third party's
+        tree, so its history is unrelated to the existing `CarloUser/globeguard-frontend` (the
+        old Pages Router storefront). Pushing over that branch would need `--force` and would
+        discard the archive on GitHub. Either make a new repository, or push this as a new branch
+        in the existing one. A new repository is cleaner.
+      - the workspace (`C:\GlobeGuard`: STATE.md, docs, docker-compose.yml, this file) — needs a
+        new repository of its own. `scripts/bootstrap.mjs` derives the other two URLs from this
+        one's `origin`, so name them consistently under the same account and a fresh clone needs
+        no arguments.
+      This machine has no `gh` CLI and no stored git credentials, so the push has to be done by
+      someone signed in.
+- [ ] **Give the partner access** (Owner). Collaborator on all three repos once they exist, and
+      point them at `ONBOARDING.md` — it is the whole setup, clone to running stack.
+- [ ] **How the beta database meets the baseline** (Owner decision, then Dev). The beta was
       built by `synchronize` from the *pre-merge* entities, so it is neither under migration control
       nor at the baseline schema; the first deploy stops at the migration step until this is
       settled. Two paths, both written up in `deploy/beta-checklist.md` A3a: rebuild the beta
@@ -42,14 +74,14 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
 
 ---
 
-## 2. Content and legal (owner writes, assistant wires up)
+## 2. Content and legal (Owner writes it, a Dev wires it up)
 
 - [ ] **Impressum details** (Owner): managing director, commercial register entry. The page is live
       with the verified facts and explicit placeholders for these two.
 - [ ] **AGB, Datenschutz, Widerruf, Zahlungsarten, Versand** (Owner, B12). The routes exist and show
       a neutral "content is being prepared" notice plus the verified facts. Datenschutz must name
       Mollie B.V., SendGrid and Bexio as processors.
-- [ ] **AGB acceptance checkbox at checkout** (Owner decision B12, then Assistant).
+- [ ] **AGB acceptance checkbox at checkout** (Owner decision B12, then Dev).
 - [ ] **Cookie consent and analytics** (Owner decision B12). Current state: no analytics, no banner.
 - [ ] **Phone number and opening hours** (Owner, B5). The footer, contact page and e-mail templates
       render the phone line only when `SUPPORT_PHONE` is set.
@@ -57,7 +89,7 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
       empty until locations are entered in the dashboard.
 - [ ] **FAQ and blog content** (Owner content). Both are wired to the backend plugins; the FAQ page
       keys match the route map, so a section published in the dashboard appears immediately.
-- [ ] **Migrate the 17 live blog posts** (Owner content, Assistant can import). The current site has
+- [ ] **Migrate the 17 live blog posts** (Owner content, a Dev can import). The current site has
       17 posts (trade fairs, INEOS, the Cape-to-Cape sponsorship) and the new backend has none, so
       all 17 old URLs currently redirect to `/blog`. Keep the old slugs when importing and the
       redirects become exact.
@@ -72,7 +104,7 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
 
 ---
 
-## 3. Commerce configuration (mostly owner decisions, small assistant tasks)
+## 3. Commerce configuration (mostly Owner decisions, small Dev tasks)
 
 - [ ] **Shipping rates** (Owner, B-plan item 3). Live values are placeholders: Swiss Post Priority
       15.00, Economy 9.00, Geschäftsversand 25.00, EU tracked 35.00, pickup Cham 0.00 (NET CHF).
@@ -80,7 +112,7 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
       safe and permanent.
 - [ ] **EU VAT strategy** (Owner, A7/B). The EU zone exists with a 0 percent placeholder rate. To
       charge EU VAT the backend also needs `AddressBasedTaxZoneStrategy` and one zone per rate.
-      Decide OSS (destination country VAT) versus origin, then Assistant implements.
+      Decide OSS (destination country VAT) versus origin, then Dev implements.
 - [ ] **Swiss price display law** (Owner, B2). The shop shows NET prices with "zzgl. MwSt." to
       everyone. Confirm with your legal advisor that this is acceptable for private customers, or
       the display rule changes for B2C pages.
@@ -88,14 +120,14 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
       `Geschäftskunden`; somebody has to assign approved companies to that group in the dashboard.
 - [ ] **Which Mollie methods** (Owner). Planned: TWINT, cards, PostFinance Pay, Apple Pay, PayPal.
       Apple Pay additionally needs domain verification on the storefront host.
-- [ ] **Order number format** (Assistant, needs a nod). Currently `GG` + 6 digits, collision-checked.
-- [ ] **Device and licence tracking** (Owner decision, then Assistant, B13). Gates the rule that a
+- [ ] **Order number format** (Dev, needs a nod). Currently `GG` + 6 digits, collision-checked.
+- [ ] **Device and licence tracking** (Owner decision, then Dev, B13). Gates the rule that a
       logged-in customer only sees the update they are eligible for. Until it exists, all update
       SKUs are purchasable by anyone.
 
 ---
 
-## 4. Technical work the assistant can finish without you
+## 4. Technical work any Dev can finish without the Owner
 
 - [x] **Baseline migration and synchronize policy**, backup and restore tooling. 89 tables,
       648 columns, generated against an empty database and diffed against the live one.
@@ -162,7 +194,7 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
 - [ ] **Mollie live key** (Owner) and a real 1 CHF test purchase.
 - [ ] **Canonical host** (Owner, B4): apex `globeguard.ch` or `www`. The storefront and the blog
       JSON-LD must agree.
-- [ ] **DNS cutover** (Owner + Assistant): lower the TTL at hosttech the day before, point the apex
+- [ ] **DNS cutover** (Owner + Dev): lower the TTL at hosttech the day before, point the apex
       and `www` at the new stack, keep mail records untouched.
 - [ ] **WooCommerce export before shutdown** (Owner): products, customers and orders, plus the
       complete URL list for the redirect map.

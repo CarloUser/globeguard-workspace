@@ -44,11 +44,14 @@ C:\GlobeGuard\                    <- the merged workspace (this is where work ha
   globeguard-frontend\            Next.js 16 App Router storefront (git, fresh history)
   reference\                      owner Excel masters + brands PDF + Bexio export (untracked)
   .tools\                         portable PostgreSQL 16 (no admin rights needed; see its README)
+  scripts\bootstrap.mjs           clones the two app repos + writes .env on a new machine
+  README.md                       what this repo is, and where to start
+  ONBOARDING.md                   <- give this to anyone new: clone -> running stack
+  STATE.md                        <- this file
   docs\
-    STATE.md                      <- this file
+    TODO.md                       <- the shared to-do list: read after you pull, update before you push
     PROGRESS.md                   chronological log: done / in progress / open
     DECISIONS.md                  owner answers A1–A10 + orchestrator calls O1–O12 (locked)
-    GO-LIVE.md                    <- the to-do list between here and launch (owner vs assistant)
     MERGE-PLAN.md                 the full plan, manifests, open questions B1–B14
     DEPLOY.md                     three environments + beta recipe + curl checks
     merge-inventory\              the original 4-repo inventory (file:line evidence)
@@ -56,7 +59,9 @@ C:\GlobeGuard\                    <- the merged workspace (this is where work ha
   docker-compose.yml, .env.example  full local stack (Postgres, Redis, server, worker, frontend)
 ```
 
-Both repos have their own `CLAUDE.md` with the rules that apply inside them.
+Both repos have their own `CLAUDE.md` with the rules that apply inside them, and both point back
+here. The three must stay side by side: `docker-compose.yml` builds the other two from relative
+paths, so a clone that flattens the layout will not build.
 
 ---
 
@@ -132,7 +137,7 @@ logs stay out (the Bexio export in `reference/` is customer data).
 3. **Blocked on the owner**: Hetzner `drivkf` SSH + managed-Postgres passwords (the beta publish
    waits only on these), the GitHub destination for all three repos, how the beta database should
    meet the baseline, the Mollie test key, legal texts, decisions B1–B14.
-   **The full launch to-do list is `docs/GO-LIVE.md`.**
+   **The full launch to-do list is `docs/TODO.md`.**
 
 ---
 
@@ -268,7 +273,7 @@ ids collided) and the checkout page querying the active order and the customer a
 - **A database built by `synchronize` cannot run the baseline migration**: it fails with
   `relation "collection_asset" already exists` and exits 1. That is the safe outcome, not a bug.
   Adopt it once with `npm run db:adopt-baseline -- --yes` (it verifies the schema first). The beta
-  needs an owner decision before that, because its schema predates the merge — see GO-LIVE §1.
+  needs an owner decision before that, because its schema predates the merge — see docs/TODO.md §1.
 - **Writing scripts through a Bash heredoc halves backslashes** in this environment: `\\n` inside a
   JS template literal arrives as a real newline and silently breaks the file. Use the Write tool for
   script files, or a Python heredoc.

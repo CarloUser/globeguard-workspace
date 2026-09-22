@@ -26,28 +26,22 @@
 # Other notes
 # - NEXT_PUBLIC_* values are baked into the frontend image at build time (build args below):
 #   change one -> `docker compose build frontend`. VENDURE_* / REVALIDATION_SECRET are runtime env.
-# - Product images are not in git: after the first boot run `npm run sync:product-assets` in
-#   globeguard-backend (pulls from the beta) or the image importer (PROJECT-CONTEXT 14.4/14.6).
-# - ASSET_URL_PREFIX has to work in TWO places, and localhost satisfies only one of them: the
-#   browser loads the image, and the frontend's next/image optimizer fetches the same URL
-#   server-side, where `localhost` is the frontend container itself. Verified inside the running
-#   container: http://server:3000/health answers 200, http://localhost:3000/health does not.
-#   The value that works on both sides is the host's own IP, which the container reaches over the
-#   bridge and the browser reaches directly (measured 2026-09-22: 172.26.176.1 answered 200 from
-#   both). So for a stack that has to render product images, put that address in .env:
-#     ASSET_URL_PREFIX=http://<your-host-ip>:3000/assets/
-#     NEXT_PUBLIC_ASSET_HOST=<your-host-ip>:3000       # build arg, so: docker compose build frontend
-#   `host.docker.internal` also works from the container but not from the browser.
-#   In production the question disappears: the supervisor serves /assets on the storefront's own
+# - Product images need no configuration. ASSET_URL_PREFIX is the storefront's own origin
+#   (localhost:3100) and the frontend rewrites /assets/* to the server container, so the one URL
+#   works in the browser AND inside the frontend container, where next/image fetches it
+#   server-side. Pointing ASSET_URL_PREFIX straight at localhost:3000 does NOT work: verified in
+#   the running stack, http://server:3000/health answers 200 from the frontend container while
+#   http://localhost:3000/health does not, so every image would 400.
+#   A fresh database has no images at all - run `npm run sync:product-assets` in the backend
+#   once (it pulls them from the live beta), see ONBOARDING.md.
+#   In production none of this applies: the supervisor serves /assets on the storefront's own
 #   origin, so one public URL is correct everywhere.
-#   Product cards use a plain <img> and are unaffected either way.
 # - The backend repo's own docker-compose.yml is the dev-deps helper (Postgres on host 6544,
 #   Redis 6379): both stacks bind Redis 6379, do not run them at the same time.
 # - Mollie webhooks cannot reach localhost: for an end-to-end payment test expose :3000 through a
 #   tunnel and set VENDURE_HOST to that public URL.
-# - `docker compose config` validated 2026-09-22 against Docker Desktop 29.8.0 (WSL2, Linux
-#   containers); the resolved output is docs/compose-config.out. The images have not been built
-#   and the stack has not been booted yet - that is the open item in docs/GO-LIVE.md section 4.
+# - Booted end to end on 2026-09-22 against Docker Desktop 29.8.0 (WSL2): both images build, the
+#   server migrates and seeds, all five services report healthy. New here? Read ONBOARDING.md.
 name: globeguard
 
 x-backend-env: &backend-env
@@ -76,7 +70,10 @@ x-backend-env: &backend-env
   # Public origin of the backend: Mollie POSTs webhooks to <VENDURE_HOST>/payments/mollie/...
   VENDURE_HOST: ${VENDURE_HOST:-http://localhost:3000}
   # Asset URLs must be reachable from the browser, not just inside the compose network.
-  ASSET_URL_PREFIX: ${ASSET_URL_PREFIX:-http://localhost:3000/assets/}
+  # The storefront serves these itself and rewrites them to this container (see the frontend
+  # service). Point it at the backend directly only if you also make that URL reachable from
+  # inside the frontend container.
+  ASSET_URL_PREFIX: ${ASSET_URL_PREFIX:-http://localhost:3100/assets/}
   # Empty = "Online bezahlen" not provisioned / e-mails discarded (both values are trimmed).
   MOLLIE_API_KEY: ${MOLLIE_API_KEY:-}
   SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
@@ -174,6 +171,12 @@ services:
         NEXT_PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-http://localhost:3100}
         # Hostname (no protocol) that serves Vendure assets over https; empty for localhost.
         NEXT_PUBLIC_ASSET_HOST: ${NEXT_PUBLIC_ASSET_HOST:-}
+        # Product images: ASSET_URL_PREFIX points at the storefront's own origin and Next rewrites
+        # /assets/* to the backend container. That is the only arrangement where one URL works both
+        # in the browser (localhost:3100 is published) and inside this container (where localhost is
+        # the container itself, so localhost:3000 is nothing). Neither is set in production.
+        VENDURE_ASSET_ORIGIN: http://server:3000
+        ALLOW_LOCAL_IMAGE_HOSTS: "true"
     image: globeguard-frontend:local
     environment:
       VENDURE_SHOP_API_URL: http://server:3000/shop-api

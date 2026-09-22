@@ -1,6 +1,13 @@
 # Merge progress log
 
-Newest first. Each entry: what was done, how it was verified, what is still open. See MERGE-PLAN.md for the plan and DECISIONS.md for owner decisions.
+Newest first. Each entry: what was done, **how it was verified**, and what is still open. The
+verification half is the point — "added X" is not useful to the next person, "added X, proven by
+Y" is.
+
+Working with someone else? Add your entry under a `## YYYY-MM-DD — @you` heading of your own
+rather than editing theirs, and it will merge cleanly. The open items live in `TODO.md`; this
+file is the narrative behind them. See MERGE-PLAN.md for the plan and DECISIONS.md for the
+decisions already locked.
 
 ## 2026-09-22 (day 2, later)
 
@@ -21,7 +28,7 @@ Newest first. Each entry: what was done, how it was verified, what is still open
 - **`npm run db:adopt-baseline`** — found while testing: a database built by synchronize fails the
   baseline with `relation "collection_asset" already exists`. migrate.js exits 1 (so the deploy
   stops safely) but then printed "No pending migrations found.", which reads like success. Both
-  fixed. The beta needs an owner decision first (GO-LIVE section 1).
+  fixed. The beta needs an owner decision first (docs/TODO.md section 1).
 - **Redirects live**: 203 map entries wired into next.config.ts, verified against a running build
   with `npm run verify:redirects` (also the cutover check). Two bugs found doing it, both now
   build-time guards: identity entries made /faq, /impressum and /support return
