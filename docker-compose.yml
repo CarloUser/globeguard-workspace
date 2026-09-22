@@ -28,11 +28,19 @@
 #   change one -> `docker compose build frontend`. VENDURE_* / REVALIDATION_SECRET are runtime env.
 # - Product images are not in git: after the first boot run `npm run sync:product-assets` in
 #   globeguard-backend (pulls from the beta) or the image importer (PROJECT-CONTEXT 14.4/14.6).
-# - ASSET_URL_PREFIX must be browser-reachable (localhost:3000). The frontend's next/image
-#   optimizer (product carousel, blog, order pages) fetches those URLs server-side, where
-#   localhost is the frontend container itself. Whether that needs a hosts alias, an
-#   unoptimized flag or a shared hostname is settled at the first real Docker run (untested:
-#   no Docker on the authoring machine). Product cards use a plain <img> and are unaffected.
+# - ASSET_URL_PREFIX has to work in TWO places, and localhost satisfies only one of them: the
+#   browser loads the image, and the frontend's next/image optimizer fetches the same URL
+#   server-side, where `localhost` is the frontend container itself. Verified inside the running
+#   container: http://server:3000/health answers 200, http://localhost:3000/health does not.
+#   The value that works on both sides is the host's own IP, which the container reaches over the
+#   bridge and the browser reaches directly (measured 2026-09-22: 172.26.176.1 answered 200 from
+#   both). So for a stack that has to render product images, put that address in .env:
+#     ASSET_URL_PREFIX=http://<your-host-ip>:3000/assets/
+#     NEXT_PUBLIC_ASSET_HOST=<your-host-ip>:3000       # build arg, so: docker compose build frontend
+#   `host.docker.internal` also works from the container but not from the browser.
+#   In production the question disappears: the supervisor serves /assets on the storefront's own
+#   origin, so one public URL is correct everywhere.
+#   Product cards use a plain <img> and are unaffected either way.
 # - The backend repo's own docker-compose.yml is the dev-deps helper (Postgres on host 6544,
 #   Redis 6379): both stacks bind Redis 6379, do not run them at the same time.
 # - Mollie webhooks cannot reach localhost: for an end-to-end payment test expose :3000 through a

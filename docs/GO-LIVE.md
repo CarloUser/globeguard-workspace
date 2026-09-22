@@ -110,10 +110,14 @@ Status of the build itself is in `STATE.md` and `PROGRESS.md`. Locked decisions 
 - [x] **End-to-end test suite** (Playwright): 16 specs, all green. It has already paid for itself —
       it caught the duplicate checkout DOM ids, the missing `languageCode`, and the redirect rule
       that made the English checkout unreachable.
-- [ ] **Docker full-stack first boot**: build both images, run the documented first-boot recipe,
-      confirm the dashboard bundle built on Linux contains the German admin translations (a Windows
-      build silently drops them). `docker compose config` passes; the images have not been built.
-      Note the compose Postgres publishes host port 5432 and collides with the portable one.
+- [x] **Docker full-stack first boot** done. Both images build (server 1.88 GB, frontend 431 MB);
+      the server applied the baseline migration to the empty database and seeded 260 products; all
+      five services healthy; shop API 233 products / CHF / de; dashboard and storefront 200; the
+      WooCommerce redirects work in the container. The Linux-built dashboard bundle **does** carry
+      the German extension translations the Windows build drops (de.js 74,950 bytes with the
+      Blog/FAQ/Bexio strings, against 52,257 and none of them). The `ASSET_URL_PREFIX` question is
+      settled too — see `DEPLOY.md` section 3. Remember the compose Postgres publishes host port
+      5432 and collides with the portable one.
 - [x] **301 redirect map from the old WooCommerce URLs**, wired into `next.config.ts`: 203 entries →
       197 rules plus 4 for `/wp-sitemap*.xml`, the five Download-Monitor query URLs handled with a
       `has` matcher, and 6 URLs deliberately left to the storefront. Two build-time guards (no

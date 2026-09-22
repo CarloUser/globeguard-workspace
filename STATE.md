@@ -113,6 +113,8 @@ logs stay out (the Bexio export in `reference/` is customer data).
 - **16 Playwright specs, all green** (§6).
 - 203 WooCommerce URLs redirect for real (`npm run verify:redirects`), Product/Breadcrumb JSON-LD,
   the hero cut from 634 KB to 17 KB, `npm run reindex` for the search index.
+- The public `trackOrder` rate limit is shared through Redis, so it holds across server processes
+  instead of being multiplied by their number; it degrades to a per-process window if Redis goes.
 
 ### Next
 
@@ -123,8 +125,7 @@ logs stay out (the Bexio export in `reference/` is customer data).
    portable PostgreSQL — stop that one first.
 2. Accessibility and responsive pass; the rest of the performance pass (fonts, configurator
    bundle). Browser QA with the Chrome extension.
-3. Redis-backed rate limiter for `trackOrder` before the backend runs as more than one process.
-4. **Blocked on the owner**: Hetzner `drivkf` SSH + managed-Postgres passwords (the beta publish
+3. **Blocked on the owner**: Hetzner `drivkf` SSH + managed-Postgres passwords (the beta publish
    waits only on these), the GitHub destination for all three repos, how the beta database should
    meet the baseline, the Mollie test key, legal texts, decisions B1–B14.
    **The full launch to-do list is `docs/GO-LIVE.md`.**
