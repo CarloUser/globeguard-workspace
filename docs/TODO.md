@@ -45,22 +45,21 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
 - [ ] **Mollie account and test key** (Owner). Until `MOLLIE_API_KEY` exists, private customers see
       "no payment method available" and the checkout cannot be finished end to end. A test key is
       enough to prove the flow; the live key is a separate item in section 5.
-- [ ] **Push the three repos to GitHub** (Owner). Nothing is on GitHub yet, so nobody else can
-      clone it. All three are fully committed locally and each needs a different decision:
-      - `globeguard-backend` — the easy one. It already has `origin`
-        `CarloUser/globeguard-backend` and is **18 commits ahead** of it on the same history, so
-        `git push` is a plain fast-forward. (Fetch first in case the remote moved.)
-      - `globeguard-frontend` — **decide first.** It was started fresh from the third party's
-        tree, so its history is unrelated to the existing `CarloUser/globeguard-frontend` (the
-        old Pages Router storefront). Pushing over that branch would need `--force` and would
-        discard the archive on GitHub. Either make a new repository, or push this as a new branch
-        in the existing one. A new repository is cleaner.
-      - the workspace (`C:\GlobeGuard`: STATE.md, docs, docker-compose.yml, this file) — needs a
-        new repository of its own. `scripts/bootstrap.mjs` derives the other two URLs from this
-        one's `origin`, so name them consistently under the same account and a fresh clone needs
-        no arguments.
-      This machine has no `gh` CLI and no stored git credentials, so the push has to be done by
-      someone signed in.
+- [x] **Push the repos to GitHub** — @carlo + assistant, 2026-09-23. All three are on GitHub
+      under `CarloUser`:
+      - `globeguard-backend` — the merged backend, pushed as a fast-forward onto the existing
+        history (`37e81a3..3313078`), so the pre-merge history is intact underneath.
+      - `globeguard-frontend-v2` — the merged storefront. A **new** repo because its history is
+        unrelated to `globeguard-frontend`, which still holds the pre-merge Pages Router build
+        the beta runs today. The folder is still called `globeguard-frontend` (docker-compose.yml
+        builds from that path); `scripts/bootstrap.mjs` maps the two names.
+      - `globeguard-workspace` — this repo: the docs, docker-compose.yml, ONBOARDING.md, this file.
+- [ ] **Decide what happens to `globeguard-frontend`** (Owner). It still holds the pre-merge Pages
+      Router build. Options: leave it as the archive and keep working in v2 (nothing to do), or
+      once v2 is proven on the beta, retire it — rename it, or overwrite its `main` after pushing
+      the old history to an `archive/pre-merge` branch. Its content is also on the Desktop at
+      `Navil_gg_website/globeguard-frontend` (40 commits, `db969d2`, identical), so nothing is
+      unique to GitHub. Until this is settled, two repos have confusingly similar names.
 - [ ] **Give the partner access** (Owner). Collaborator on all three repos once they exist, and
       point them at `ONBOARDING.md` — it is the whole setup, clone to running stack.
 - [ ] **How the beta database meets the baseline** (Owner decision, then Dev). The beta was

@@ -19,9 +19,14 @@ import process from 'node:process';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 process.chdir(root);
 
+// `dir` is where the clone has to land — docker-compose.yml builds from those exact paths, so it
+// is not free. `repo` is what the repository happens to be called on GitHub, which is not the same
+// thing: the merged storefront lives in globeguard-frontend-v2 because globeguard-frontend still
+// holds the pre-merge Pages Router build. If those two are ever consolidated, change `repo` here
+// and nothing else moves.
 const REPOS = [
-    { dir: 'globeguard-backend', env: 'BACKEND_REPO_URL', name: 'backend' },
-    { dir: 'globeguard-frontend', env: 'FRONTEND_REPO_URL', name: 'storefront' },
+    { dir: 'globeguard-backend', repo: 'globeguard-backend', env: 'BACKEND_REPO_URL', name: 'backend' },
+    { dir: 'globeguard-frontend', repo: 'globeguard-frontend-v2', env: 'FRONTEND_REPO_URL', name: 'storefront' },
 ];
 
 // Secrets that only have to be unguessable, not shared: each machine generates its own.
@@ -48,7 +53,7 @@ for (const repo of REPOS) {
         failed = true;
         continue;
     }
-    const url = process.env[repo.env] || deriveUrl(origin, repo.dir);
+    const url = process.env[repo.env] || deriveUrl(origin, repo.repo);
     if (!url) {
         console.log(
             `  ${repo.dir.padEnd(22)} NEEDS A URL: this repo has no origin to derive one from.\n` +
@@ -107,14 +112,14 @@ function writeEnv() {
     console.log('                         (local-only values; .env is gitignored)');
 }
 
-function deriveUrl(originUrl, dir) {
+function deriveUrl(originUrl, repoName) {
     if (!originUrl) {
         return null;
     }
     // Replace the last path segment, keeping scheme, host, account and any .git suffix. Works for
     // https://host/account/name.git and git@host:account/name.git alike.
     const match = /^(.*[/:][^/]+\/)([^/]+?)(\.git)?$/.exec(originUrl.trim());
-    return match ? `${match[1]}${dir}${match[3] || ''}` : null;
+    return match ? `${match[1]}${repoName}${match[3] || ''}` : null;
 }
 
 function tryGit(args, cwd = root) {

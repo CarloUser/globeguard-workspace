@@ -19,7 +19,7 @@ GlobeGuard/                 <- this repo (docs, docker-compose.yml, the to-do li
 ```
 
 ```bash
-git clone <workspace-repo-url> GlobeGuard
+git clone https://github.com/CarloUser/globeguard-workspace.git GlobeGuard
 cd GlobeGuard
 node scripts/bootstrap.mjs          # clones the other two next to this file and writes .env
 ```
@@ -27,12 +27,26 @@ node scripts/bootstrap.mjs          # clones the other two next to this file and
 If you have no Node yet, do the same by hand:
 
 ```bash
-git clone <backend-repo-url>  globeguard-backend
-git clone <frontend-repo-url> globeguard-frontend
+git clone https://github.com/CarloUser/globeguard-backend.git     globeguard-backend
+git clone https://github.com/CarloUser/globeguard-frontend-v2.git globeguard-frontend
 cp .env.example .env
 # then edit .env: set SUPERADMIN_PASSWORD, COOKIE_SECRET and REVALIDATION_SECRET to
 # long random strings of your own. Any value works locally; they are not shared secrets.
 ```
+
+**The storefront folder and its repository have different names on purpose.** The merged
+storefront lives in `globeguard-frontend-v2`; `globeguard-frontend` is still the pre-merge Pages
+Router build that the beta runs today. Clone v2 **into a folder called `globeguard-frontend`** —
+`docker-compose.yml` builds from that path. `bootstrap.mjs` already does this for you.
+
+> Already have an old `globeguard-frontend` clone? Do not try to pull into it. The two have no
+> commit in common, so git refuses ("refusing to merge unrelated histories"). Move it aside and
+> clone v2 fresh:
+>
+> ```bash
+> mv globeguard-frontend globeguard-frontend-old
+> git clone https://github.com/CarloUser/globeguard-frontend-v2.git globeguard-frontend
+> ```
 
 `.env` is gitignored and never leaves your machine.
 
