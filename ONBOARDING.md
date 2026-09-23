@@ -19,6 +19,8 @@ GlobeGuard/                 <- this repo (docs, docker-compose.yml, the to-do li
 ```
 
 ```bash
+# on Windows, pick a SHORT path (C:\GlobeGuard). A deep one hits the 260-character
+# filename limit part-way through the clone and fails with "Filename too long".
 git clone https://github.com/CarloUser/globeguard-workspace.git GlobeGuard
 cd GlobeGuard
 node scripts/bootstrap.mjs          # clones the other two next to this file and writes .env
@@ -181,6 +183,7 @@ docker compose down -v            # -v also drops the database and uploaded asse
 
 | Symptom | Cause |
 |---|---|
+| `Filename too long` / `invalid index-pack output` while cloning (Windows) | The path is too deep. Clone into something short like `C:\GlobeGuard`, or run `git config --global core.longpaths true` once. |
 | `port 5432 already in use` | Another Postgres is running. Stop it, or change the published port in `docker-compose.yml`. |
 | Registration never sends an e-mail | `APP_ENV=production` discards mail without a SendGrid key. Set `APP_ENV=development` in `.env` and read the mailbox at http://localhost:3000/mailbox. |
 | Listing pages show old products or old images | The collection and search pages read Vendure's search index, not the tables. `cd globeguard-backend && npm run reindex`. |
