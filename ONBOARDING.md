@@ -1,7 +1,9 @@
 # Getting the GlobeGuard shop running on a new machine
 
-You need **Docker Desktop** and **git**. Node 22 is optional and only needed if you want to run
-tests or a hot-reloading dev server outside Docker.
+You need **Docker Desktop**, **git**, and **Node 22**. Docker runs the stack; git gets the code;
+Node runs `scripts/bootstrap.mjs` below, the test suites, and the hot-reloading dev server. (You can
+skip Node if you clone the two repos by hand — the commands are in section 1 — but you will want it
+as soon as you change anything.)
 
 Everything below has been run end to end on Windows 11 with Docker Desktop 29.8.0 (WSL2).
 
