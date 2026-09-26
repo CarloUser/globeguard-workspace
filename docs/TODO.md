@@ -23,7 +23,7 @@ Roles: **Owner** = only Carlo can do it (credentials, business facts, legal, mon
 
 | Person | Item | Since |
 |---|---|---|
-| _(nobody yet)_ | | |
+| @richard (+ assistant) | Working through the open Dev items in §4 with visual checks on the local Docker stack; will add a row per item before touching it | 2026-09-26 |
 
 Related reading: `STATE.md` is the state of the build, `docs/PROGRESS.md` is the narrative log of
 what was done and how it was verified, `docs/DECISIONS.md` holds the decisions already locked
@@ -178,6 +178,18 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       limit holds across server processes instead of being multiplied by their number. Falls back
       to a per-process window if Redis goes away. Proven against a real Redis with two limiter
       instances standing in for two replicas.
+- [x] **Second machine set up from ONBOARDING.md** — @richard, 2026-09-26. Clone, bootstrap, build,
+      first boot and image sync worked as written: baseline migration + seed created 260 (233 shop
+      products, 28 collections, CHF, de), all five services healthy, images for 224/233 products
+      (129 unique assets; the other 9 have none on the beta either), reindex 272 items, storefront
+      and a product page checked in a browser. Notes for the next person: the sync imports ~130
+      assets, not the "~744" ONBOARDING §3 mentions; if an older local stack with project name
+      `globeguard` exists on the machine, start the new one under another `COMPOSE_PROJECT_NAME`,
+      otherwise it adopts the old database volume.
+- [ ] **Catch-up migration for `faq_section.items`** (Dev). On a fresh database the server logs
+      "Your database schema does not match your current configuration" right after the baseline:
+      the entity has `DEFAULT '[]'::jsonb` on `faq_section.items`, the baseline does not. Harmless
+      today; a one-line migration makes the baseline match the entities.
 - [ ] **Beta hostname noindex check** after the first beta deploy (the storefront already returns a
       disallow-all robots.txt when the site URL contains `beta.`; the deploy script asserts it).
 
