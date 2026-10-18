@@ -88,6 +88,23 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       empty until locations are entered in the dashboard.
 - [ ] **FAQ and blog content** (Owner content). Both are wired to the backend plugins; the FAQ page
       keys match the route map, so a section published in the dashboard appears immediately.
+- [ ] **Hand over the FAQ texts** (@richard, then Dev). Richard has compiled the FAQs (noted
+      2026-10-18) and provides them as a file; a Dev then imports them through the FAQ plugin's
+      admin API (upsert per section) instead of typing them into the dashboard. Format, so the
+      import can be scripted:
+      - A plain text or Markdown file (`.txt` / `.md`, UTF-8), one file per language
+        (`faq-de.md`, later `faq-en.md`). Word is fine too; a Dev converts it.
+      - `# <page>` starts a section. `<page>` is one of the keys in the backend's
+        `faq.constants.ts` (e.g. `faq`, `support`, `support-sgw`, `produkte-basic`, `produkte-womo`,
+        `versand`, `zahlungsarten`), or `kategorie: <slug>` for a product category. When in doubt,
+        everything goes under `# faq`.
+      - `## <question>` starts a question; the answer is the plain text below it, until the next
+        `##`. Blank line = new paragraph, `- ` = bullet point, links as full URLs.
+      - Swiss spelling (`ss`), only owner-approved claims (no promises on delivery, compatibility
+        or discounts that are not already on the site).
+      Where to put it: the workspace repo under `content/faq/` (so Carlo has it too), or send it
+      to whoever does the import. After the import the sections are created unpublished; publish
+      after a read-through on localhost.
 - [ ] **Migrate the 17 live blog posts** (Owner content, a Dev can import). The current site has
       17 posts (trade fairs, INEOS, the Cape-to-Cape sponsorship) and the new backend has none, so
       all 17 old URLs currently redirect to `/blog`. Keep the old slugs when importing and the
@@ -162,6 +179,52 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       headings as `h4` so every page jumped h1 → h4. Still open, because they need a real browser
       and a person: keyboard focus order and traps, colour contrast, and the responsive pass from
       320 px to 1440 px.
+      Responsive pass — @richard, 2026-10-18: 32 routes × de/en × 9 widths (320–1440 px), checked
+      for horizontal scroll and the element causing it. Fixed: the empty band under the nav, the
+      phone navbar (see the items below), the related-products carousel arrows (`-left-12` put them
+      outside the 16px gutter, so 768–1280 px scrolled sideways; now inside a `md:px-12` gutter),
+      and the legal-page h1 ("Geschäftsbedingungen" / "Datenschutzerklärung" are single words wider
+      than a 320px screen at 30px; now 24px below `sm`, `break-words` as a safety net). After that:
+      0 of 576 checks scroll sideways. Also found: the desktop nav wrapped into a second row from
+      1024 to 1279 px and unknown URLs got Next's bare 404 (both fixed, items below).
+      Still open here: keyboard focus order and traps, colour contrast.
+- [x] **Desktop nav wraps and overlaps the page from 1024 to 1279 px** (Dev, needs a design call).
+      Row 2 of the navbar is `h-12`, but its eight links need ~1080–1107 px (de/en) and get 960 at
+      1024 px, so they wrap; the second line (e.g. "Updates & Erweiterungen", "Support") hangs
+      below the header over the page content. Affects iPad landscape (1024/1180) and small laptops.
+      Tighter padding alone does not get there (~120 px short). Options: (a) keep the mobile menu
+      button and hide row 2 up to `xl` (1280) instead of `lg`; (b) let row 2 grow (`min-h-12`) so
+      the header is two nav lines tall there; (c) shorter labels at `lg` (owner wording).
+      — @richard, 2026-10-18: option (a). Row 2 is `xl:flex`, the menu toggle `xl:hidden`; the
+      search field in row 1 stays from `lg`. Measured de/en at 390/768/1023/1024/1180/1279/1280/
+      1440 px: below 1280 menu button and no nav row (header 73 px instead of 121 px from 1024),
+      from 1280 one nav line as before, no horizontal scroll anywhere; menu sheet checked at 1024.
+- [x] **Unknown URLs show Next's bare 404, not the shop's** (Dev). `/gibt-es-nicht` and
+      `/en/gibt-es-nicht` return the default "404: This page could not be found." page: English,
+      no header/footer, `<html>` without `lang`. `[locale]/not-found.tsx` (German/English, links
+      back into the shop) only renders when a page calls `notFound()`; an unmatched URL never
+      reaches the `[locale]` layout. The usual next-intl fix is `app/[locale]/[...rest]/page.tsx`
+      calling `notFound()`; check it does not shadow the `/assets` rewrite, the 203 legacy
+      redirects (`npm run verify:redirects`) or `robots`/`sitemap`. `/products/<unknown>` renders
+      differently again (`<html id="__next_error__">`), look at it in the same go. Matters most at
+      cutover: every stale or mistyped link lands there.
+      — @richard, 2026-10-18. Added `app/[locale]/[...rest]/page.tsx`: calls `notFound()`, metadata
+      title `NotFound.title` and `robots: noindex, follow` (the layout's default robots would
+      otherwise replace Next's noindex). `[locale]/not-found.tsx` now renders `<main
+      id="main-content">`, so the skip link has a target on every 404. `/products/<unknown>` was
+      fine: `__next_error__` is only the initial streaming shell, the hydrated page is the shop's
+      404 with `lang="de"`. Verified: unknown URLs (incl. nested ones like `/produkte/basic/foo`)
+      in de/en return 404 with the shop layout, correct `lang`, title and noindex; all existing
+      pages 200; `npm run verify:redirects` OK (all 203 legacy URLs), `npm run audit:a11y` clean,
+      `/assets/*` still served through the rewrite, robots.txt/sitemap.xml 200, `/collection/x`
+      still 308. Left as is: the product and blog 404s (their own `generateMetadata`) still say
+      `index, follow`; harmless with status 404, a one-liner each if wanted.
+- [ ] **Carousel arrows have hard-coded English screen-reader labels** (Dev). `ui/carousel.tsx`
+      renders `<span className="sr-only">Previous slide</span>` / `Next slide`, so a German
+      screen-reader user hears English on every product page (related-products carousel). Route
+      them through next-intl (e.g. `Common.previousSlide` / `Common.nextSlide`, or a label prop the
+      caller fills). `npm run audit:a11y` does not catch it: the buttons do have a name, just in
+      the wrong language. Found 2026-10-18 (@richard) during the responsive pass.
 - [~] **Performance pass**. Done: the home-page hero was a CSS background, so every visitor
       downloaded 634 KB at full size on any device; it now goes through `next/image` (17 KB AVIF at
       640 px) and the deploy fails if optimisation is not working. Fonts need nothing: `next/font`

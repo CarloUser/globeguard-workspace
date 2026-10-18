@@ -71,6 +71,45 @@ decisions already locked.
   goes from "Your database schema does not match ... ALTER TABLE "faq_section" ..." straight to
   "No pending migrations found"; `information_schema` still shows `'[]'::jsonb`. No other entity
   has a cast inside a `default: () =>`. The backend has no unit tests.
+- **Responsive pass 320–1440 px** (frontend). 32 public routes (incl. two product pages, cart,
+  auth pages, search, a 404) in German and English at 320/360/375/390/414/768/1024/1280/1440 px,
+  run as same-origin iframes: horizontal scroll, and for each hit the text node or element that
+  causes it. Fixes from it:
+  - Related-products carousel: the shadcn arrows sit at `-left-12`/`-right-12`, outside a 16px
+    gutter, so product pages scrolled sideways from 768 to 1280 px. The carousel now has a
+    `md:px-12` gutter and the arrows sit at `left-0`/`right-0` inside it (`product-carousel.tsx`;
+    the generic `ui/carousel.tsx` is untouched).
+  - Legal-page h1: "Geschäftsbedingungen" and "Datenschutzerklärung" are single words wider than a
+    320px screen at 30px. `hyphens-auto` was tried first, but the test browser has no German
+    hyphenation dictionary, so only the `break-words` fallback applied and split mid-word.
+    Now `text-2xl` (24px) below `sm`, `sm:text-3xl`, `md:text-4xl`, with `break-words` kept as a
+    safety net; "Allgemeine / Geschäftsbedingungen" breaks between the words.
+  - Desktop nav from 1024 to 1279 px: the eight links need ~1080–1107 px and got 960, so the
+    `h-12` row wrapped and its second line hung over the page. Richard chose to keep the menu
+    button up to `xl`: row 2 is `xl:flex`, the toggle `xl:hidden`, search stays from `lg`.
+- Verified: the full sweep again after the fixes — 0 of 576 checks scroll sideways (15 timeouts
+  in one window during the run all passed on a re-run); nav measured at 8 widths in both
+  languages; screenshots of /agb at 320, a product page at 1024 and the menu sheet at 1024.
+  Gates: tsc (after `next typegen`), eslint, 115/115 vitest.
+- Sweep gotcha: visiting any `/en` page sets `NEXT_LOCALE=en`; German root URLs then redirect to
+  `/en/...`. The first sweep fell into this (only 320 px was really German), so clear the cookie
+  before each batch or test English through explicit `/en/` URLs.
+- New items in `TODO.md` §4: unknown URLs get Next's bare English 404 instead of
+  `[locale]/not-found.tsx` (fixed, next entry); the carousel's screen-reader labels are
+  hard-coded English (open). §2: Richard hands over his FAQ texts (format defined there).
+- **Unknown URLs get the shop's 404** (frontend). An unmatched URL never reached the `[locale]`
+  layout, so Next served its bare English "404: This page could not be found." (no header, no
+  `lang`). New `app/[locale]/[...rest]/page.tsx` calls `notFound()`, which renders
+  `[locale]/not-found.tsx` inside the shop layout, still status 404; its metadata sets the
+  `NotFound.title` and `noindex, follow`. `not-found.tsx` now wraps its content in `<main
+  id="main-content">` (the skip link had no target on 404s). Checked beforehand that the catch-all
+  cannot shadow anything: redirects run before routing, the `/assets` rewrite is `afterFiles` and
+  beats dynamic routes, `ownRoutes()` in next.config.ts skips `[...]` folders.
+- Verified: curl over unknown (incl. nested), existing and technical URLs — 404/200/308 as
+  expected; in the browser after hydration de/en 404s have the shop layout, the right `lang`,
+  title, noindex and a `#main-content` target; `npm run verify:redirects` OK (203 legacy URLs),
+  `npm run audit:a11y` clean, an `/assets/preview/...png` still 200 through the rewrite. Gates:
+  tsc, eslint, 115/115 vitest. No e2e test covers the 404 page.
 - A fresh checkout needs `npx next typegen` before `tsc --noEmit` passes (`PageProps` /
   `LayoutProps` are generated globals); `next build` does this itself.
 
