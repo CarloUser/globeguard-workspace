@@ -31,8 +31,46 @@ decisions already locked.
 - Not checked live: the blog post page (no posts in the local database); it is the same one-line
   change as /blog.
 
-### Open
-- Found on the way: the navbar overflows horizontally on phones — new item in `TODO.md` §4.
+- **Navbar no longer overflows on phones** (frontend). Below `sm` row 1 (logo 168, language
+  picker 99, CHF/EUR 82, cart 36, menu 36, gaps and padding) needed ~481px at every phone width,
+  so on a 390px phone the currency toggle was cut off and the page scrolled sideways. Below `sm`
+  only: the language picker shows just the globe as a 32px square (the language name is hidden
+  with `hidden sm:inline`, the aria-label "Sprache wechseln" is unchanged, the dropdown is
+  unchanged), the logo is 120px (`sizes` updated to match), and the logo-to-cluster gap is
+  `gap-2`. A first attempt to narrow the CHF/EUR items had no effect — inside a `spacing=0`
+  toggle group `group-data-[spacing=0]:px-2` overrides any `px-*` on the item — and was dropped.
+
+### How it was verified (navbar)
+- Measured row 1 in the rebuilt stack at 320/340/360/375/390/414/430/639/640/768/1024/1440px on
+  /kontakt, plus / and /produkte/basic at 360px: no horizontal scroll and a 16px right margin from
+  ~345px up; at 640px and above the widths are the same as before. Screenshot at 390px with the
+  language dropdown open (.playwright-mcp/navbar-mobile-fixed.png on Richard's machine).
+- Gates: tsc (after `next typegen`), eslint, 115/115 vitest. The e2e helpers find the language
+  button by its aria-label, and `home.spec.ts` checks its text at desktop width, so they are not
+  affected; the e2e suite itself was not run.
+
+- **Navbar at 320px: CHF/EUR moves into the mobile menu** (frontend, product call by Richard).
+  The changes above fit from ~345px; below that only dropping something from row 1 helps. Below
+  360px the navbar's `DisplayCurrencyToggle` gets `hidden min-[360px]:flex`, and the mobile menu
+  sheet renders the same component under its own heading `Common.displayCurrency`
+  ("Anzeigewährung") with `min-[360px]:hidden`. Both read and write the same
+  `DisplayCurrencyProvider` cookie, so there is one state.
+- Verified: measured 320/340/359/360/375/390/640/1440px — no horizontal scroll, 16px right margin
+  everywhere, toggle in the navbar from 360px, in the menu below. At 320px on
+  /produkte/kategorie/zubehoer: opened the menu, chose EUR — EUR pressed, prices 90.00 CHF →
+  99.00 EUR, cookie `gg-display-currency=EUR`; switched back to CHF. Gates as above, green. The e2e
+  suite runs at 1440px only and does not touch the currency toggle.
+- **Schema-drift warning for `faq_section.items` silenced** (backend). The TODO item asked for a
+  catch-up migration, but the baseline and the database already had `DEFAULT '[]'::jsonb` (the
+  table itself is empty locally). Reading TypeORM 0.3.28 showed a false positive: the query runner
+  strips `::type` casts from the default it reads back (`'[]'::jsonb` → `'[]'`), while a function
+  default from the entity is compared verbatim (`'[]'::jsonb`), so they never matched. The entity
+  default is now `() => "'[]'"`; Postgres applies the cast itself, the stored default is the same.
+  No migration, no data change.
+- Verified: `docker compose build server` (runs `tsc`) and restart of server + worker; the boot log
+  goes from "Your database schema does not match ... ALTER TABLE "faq_section" ..." straight to
+  "No pending migrations found"; `information_schema` still shows `'[]'::jsonb`. No other entity
+  has a cast inside a `default: () =>`. The backend has no unit tests.
 - A fresh checkout needs `npx next typegen` before `tsc --noEmit` passes (`PageProps` /
   `LayoutProps` are generated globals); `next build` does this itself.
 

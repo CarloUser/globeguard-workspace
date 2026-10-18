@@ -186,10 +186,19 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       assets, not the "~744" ONBOARDING §3 mentions; if an older local stack with project name
       `globeguard` exists on the machine, start the new one under another `COMPOSE_PROJECT_NAME`,
       otherwise it adopts the old database volume.
-- [ ] **Catch-up migration for `faq_section.items`** (Dev). On a fresh database the server logs
+- [x] **Catch-up migration for `faq_section.items`** (Dev). On a fresh database the server logs
       "Your database schema does not match your current configuration" right after the baseline:
       the entity has `DEFAULT '[]'::jsonb` on `faq_section.items`, the baseline does not. Harmless
       today; a one-line migration makes the baseline match the entities.
+      — @richard, 2026-10-18. **The premise was wrong, no migration needed:** the baseline and the
+      database both already have `DEFAULT '[]'::jsonb`. It was a false positive in TypeORM 0.3.28:
+      it strips `::type` casts from the default it reads back from Postgres
+      (`PostgresQueryRunner.js` ~2075, giving `'[]'`) but takes a function default from the entity
+      verbatim (`'[]'::jsonb`), so the two never compared equal and every boot reported drift.
+      Fix: the entity default is now `() => "'[]'"` (Postgres casts it itself; the stored default
+      stays `'[]'::jsonb`). Verified: server rebuilt, the boot log no longer shows the drift
+      message, the column default in the database is unchanged. It was the only cast in a
+      function default in `src`. Rule for the future: never put a `::cast` into a `default: () =>`.
 - [x] **Empty band under the navbar on 18 content pages** (Dev). The header is `sticky top-0`
       (`navbar.tsx`), but every content page's `<main id="main-content">` carries `pt-32`, as if
       the header were `fixed`. Result: a 128px empty slate band between the nav and the page
@@ -200,10 +209,21 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       own, so its container got `pt-10` instead. Measured 23 routes at 1440px and 390px: the
       heading block now starts directly under the nav. Blog post page not checked live (no posts
       locally) — same one-line change. The home hero's `pt-32` is real hero padding, left as is.
-- [ ] **Navbar overflows horizontally on phones** (Dev). At 390px the utility cluster in row 1 of
+- [x] **Navbar overflows horizontally on phones** (Dev). At 390px the utility cluster in row 1 of
       `navbar.tsx` (language picker, CHF/EUR toggle, cart, login) is ~90px wider than the viewport:
       the currency toggle and the login link are cut off and the whole page scrolls sideways
       (`scrollWidth` 465 vs 375). Seen on /kontakt, applies to every page. Found 2026-10-18 (@richard).
+      — @richard, 2026-10-18. Row 1 needed ~481px below `sm` at any phone width. Below `sm` only:
+      the language picker is a 32px globe button (label hidden, aria-label unchanged), the brand
+      logo is 120px instead of 168px, and the brand-to-cluster gap is `gap-2`. Everything fits with
+      16px margins from ~345px up (measured 340–640px, plus 768/1024/1440 unchanged). Note: a
+      `px-*` on a `ToggleGroupItem` does nothing inside a `spacing=0` group, the group's `px-2` wins.
+- [x] **Navbar at 320px** (Dev, product call by @richard: move CHF/EUR into the menu). Below ~345px
+      row 1 still overflowed by up to 22px (iPhone SE 1st gen, Android with an enlarged display
+      size). — @richard, 2026-10-18. Below 360px the navbar hides its CHF/EUR toggle and the mobile
+      menu sheet shows it as its own "Anzeigewährung" section under "Konto" (same component, same
+      cookie; existing `Common.displayCurrency` string, no new translations). Measured 320–1440px:
+      no overflow, 16px margin. At 320px switched to EUR in the menu: prices 90.00 CHF → 99.00 EUR.
 - [ ] **Beta hostname noindex check** after the first beta deploy (the storefront already returns a
       disallow-all robots.txt when the site URL contains `beta.`; the deploy script asserts it).
 
