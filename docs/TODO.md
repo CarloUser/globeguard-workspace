@@ -173,7 +173,7 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       is also the cutover check against the real host.
 - [x] **Product JSON-LD** on product pages, with an AggregateOffer for the four products that show a
       price range, plus BreadcrumbList. Verified against the shop API.
-- [~] **Accessibility**: the structural pass is done and `npm run audit:a11y` keeps it that way
+- [x] **Accessibility**: the structural pass is done and `npm run audit:a11y` keeps it that way
       (twelve pages, exits non-zero on a finding). It found and fixed four real problems: no skip
       link anywhere, three pages with no `<main>` landmark, two `<h1>` on the cart, and footer
       headings as `h4` so every page jumped h1 → h4. Still open, because they need a real browser
@@ -187,7 +187,17 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       than a 320px screen at 30px; now 24px below `sm`, `break-words` as a safety net). After that:
       0 of 576 checks scroll sideways. Also found: the desktop nav wrapped into a second row from
       1024 to 1279 px and unknown URLs got Next's bare 404 (both fixed, items below).
-      Still open here: keyboard focus order and traps, colour contrast.
+      Keyboard and contrast — @richard, 2026-10-18: axe-core (WCAG 2.2 AA) over 30 routes × 2
+      widths plus a Tab walk of every page. Fixed: brand blue `--primary` 38% → 34% (`#0074AD`;
+      white on blue and blue links on slate-50/100 were 3.9–4.3:1), `--destructive` 60% → 45%,
+      success `green-600` → `700`, `.text-mono-label` beating `text-white` on the dark badges
+      (now an `@utility`), unnamed pagination/sort/product-image links, invisible-but-focusable
+      gallery arrows, quantity select without focus ring, SGW table not keyboard-scrollable, and
+      seven pages (search, register, password, verify, account) without the skip-link target.
+      Result: 0 axe violations on 54 checks, focus visible on every stop, no traps; menu sheet,
+      language picker, configurator and SGW dialog work by keyboard alone (details in
+      PROGRESS.md). Not done: a session with a real screen reader (NVDA/VoiceOver) — worth an
+      hour before go-live, ideally by someone who uses one.
 - [x] **Desktop nav wraps and overlaps the page from 1024 to 1279 px** (Dev, needs a design call).
       Row 2 of the navbar is `h-12`, but its eight links need ~1080–1107 px (de/en) and get 960 at
       1024 px, so they wrap; the second line (e.g. "Updates & Erweiterungen", "Support") hangs
@@ -219,12 +229,16 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       `/assets/*` still served through the rewrite, robots.txt/sitemap.xml 200, `/collection/x`
       still 308. Left as is: the product and blog 404s (their own `generateMetadata`) still say
       `index, follow`; harmless with status 404, a one-liner each if wanted.
-- [ ] **Carousel arrows have hard-coded English screen-reader labels** (Dev). `ui/carousel.tsx`
+- [x] **Carousel arrows have hard-coded English screen-reader labels** (Dev). `ui/carousel.tsx`
       renders `<span className="sr-only">Previous slide</span>` / `Next slide`, so a German
       screen-reader user hears English on every product page (related-products carousel). Route
       them through next-intl (e.g. `Common.previousSlide` / `Common.nextSlide`, or a label prop the
       caller fills). `npm run audit:a11y` does not catch it: the buttons do have a name, just in
       the wrong language. Found 2026-10-18 (@richard) during the responsive pass.
+      — @richard, 2026-10-18: `ui/carousel.tsx` takes a `label` prop (English default), the
+      product carousel fills it from `Common.previousSlide`/`nextSlide`, and also translates the
+      `aria-roledescription`s ("Karussell"/"Folie", read out verbatim) and names the region by its
+      heading. Checked de/en in the browser.
 - [~] **Performance pass**. Done: the home-page hero was a CSS background, so every visitor
       downloaded 634 KB at full size on any device; it now goes through `next/image` (17 KB AVIF at
       640 px) and the deploy fails if optimisation is not working. Fonts need nothing: `next/font`
@@ -233,6 +247,23 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       configurator route (`npm run analyze`), and the 5.2 MB of brand logos in
       `public/images/brands` — served at about 1.5 KB each, so that one is repo weight rather than
       anything a visitor feels.
+      Configurator bundle — @richard, 2026-10-18: measured, not the problem. `/produkte/basic`
+      loads 9 KB (gzip) more JS than the home page and has the lowest blocking time of all pages
+      (0.6 s at 4× CPU); product pages load +50 KB. See the next item for what is slow instead.
+- [ ] **Product and category pages block the main thread for 1.7–2.2 s on a slow phone** (Dev,
+      needs a scope call). Clean headless Chrome, 390 px, 4× CPU (what Lighthouse mobile uses),
+      median of 5: total blocking time home 0.8 s, configurator 0.6 s, FAQ 1.0 s, category with
+      40 cards 1.7 s, product pages 1.7–2.2 s (LCP is fine: 1.9–3.6 s). The product page does no
+      more total work than the configurator, but hydrates one large client tree in a few long
+      tasks: ProductInfo + configurator panel + the 12-card related carousel, and every
+      `ProductCard` is a `"use client"` component (it only needs client code for `<Price>` and
+      the button). Options, biggest effect first: (a) make `ProductCard` a server component with
+      `<Price>` as the client island, and pass the cards into the carousel as children (helps
+      category, search and product pages); (b) render the related-products carousel only when it
+      scrolls into view; (c) small: cache `Intl.NumberFormat` in `formatMoney`/`<Price>`, lazy-load
+      the global `<Toaster>` (sonner, 13 KB, only product pages toast). Re-measure on the beta
+      host with Lighthouse before and after; local numbers include no CDN/compression tuning.
+      Richard, 2026-10-18: keep open, measure on the beta server first.
 - [x] **Search index freshness**: `npm run reindex` (polls the job, exits non-zero if it fails or
       the worker is not running). The seeder and the asset importer already queued one; what did not
       was a direct SQL change, which is exactly what went wrong once already.

@@ -113,6 +113,67 @@ decisions already locked.
 - A fresh checkout needs `npx next typegen` before `tsc --noEmit` passes (`PageProps` /
   `LayoutProps` are generated globals); `next build` does this itself.
 
+- **Accessibility: colour contrast, keyboard, screen-reader names** (frontend). Ran axe-core 4.10
+  (WCAG 2.2 A/AA rules) in the browser over 30 routes × 1440/390 px, and walked every page with
+  Tab to the footer (focus visible? element visible? trapped?). Fixes:
+  - **Brand blue** `--primary` 38% → 34% lightness (`#0081C2` → `#0074AD`, same hue): white
+    button text was 4.3:1 and blue links on slate-50/100 3.9–4.1:1, below AA 4.5:1; now
+    4.7–5.1:1 everywhere. `--ring`/`--chart-1` follow. The logo image is untouched.
+  - **`--destructive`** 60% → 45% (error text was 3.8:1 on white, 3.3:1 on the
+    `bg-destructive/10` alerts). Success messages `text-green-600` (3.2:1) → `green-700`; the
+    facet counts and the blog-pagination dots `slate-400` (2.6:1) → `slate-500`.
+  - **`.text-mono-label`** was a class in `@layer utilities` and so beat every colour utility
+    placed next to it: the dark badges ("Für Werkstätten & Betriebe") showed slate-500 on
+    slate-900 (3.7:1) instead of white. Now a real `@utility`, which Tailwind orders before
+    single-property utilities, so `text-white`/`text-slate-600` win.
+  - **Names**: carousel arrows, role descriptions ("Karussell"/"Folie") and the region name go
+    through next-intl (`ui/carousel.tsx` got a `label` prop with the English default); the shared
+    pagination (search, categories) got a nav label, prev/next labels and `aria-current`; the
+    sort select got a label; the product-card image link (empty for products without an image,
+    and a duplicate tab stop) is `tabIndex=-1 aria-hidden` like on the blog cards.
+  - **Keyboard**: the product-gallery arrows were tab stops at opacity 0, now they appear on
+    `focus-visible`; the product quantity `<select>` had `outline-none` and no replacement, its
+    label now shows the input focus ring; the SGW table's scroll container is a focusable named
+    region (`Table` got an optional `scrollLabel`); the mobile menu dialog is named "Menü" (it was
+    only the logo).
+  - **Skip-link targets**: `/search` and its loading state, `/register`, `/forgot-password`,
+    `/reset-password`, `/verify`, `/verify-pending` and the account layout had no
+    `<main id="main-content">`. The two password pages had no level-1 heading (the `CardTitle`
+    now has `role="heading" aria-level=1`, no visual change). `/reset-password` had a hard-coded
+    English title; it is translated now.
+- Verified: axe again over 27 routes × 2 widths (incl. the auth pages and `/en`): 0 violations,
+  every page exactly one `main#main-content` and one level-1 heading. Tab walk over 14 routes ×
+  2 widths: skip link first, header → main → footer, a focus indicator on every stop, no trap.
+  By keyboard only: mobile menu (focus stays inside, Escape closes, focus back on "Menü öffnen"),
+  language picker (Enter, arrows, Escape), configurator BASIC → VW 2022 → "Zum Produkt", SGW
+  checkbox → alert dialog (named and described, focus on "Freischaltung behalten", Tab stays
+  inside, Escape keeps SGW selected and returns focus). Screenshots: a11y-primary-after.png,
+  a11y-gallery-arrow-focus.png. `audit:a11y` clean, `verify:redirects` OK. Gates: tsc, eslint,
+  115/115 vitest. Not done: a real screen reader (NVDA/VoiceOver) session.
+- **Performance: the configurator bundle is not the problem** (analysis only, no code change).
+  Measured in headless Chrome with a clean profile (the Playwright MCP browser carries an
+  extension that inflates every number), 390 px, 4× CPU, ~1.6 Mbit/s + 150 ms, cold cache, median
+  of 5. JS transferred: ~280 KB gzip on every page (React DOM ~71 KB, Next router ~49 KB,
+  base-ui, sonner 13 KB …), `/produkte/basic` +9 KB, product pages +50 KB (product info,
+  configurator panel, gallery, tabs, domain logic incl. the 10 KB brand table). Total blocking
+  time: configurator 0.6 s, home 0.8 s, FAQ/Kontakt 1.0–1.2 s, ELITE 1.3 s, category with 40
+  cards 1.7 s, product pages 1.7–2.2 s; LCP 1.9–3.6 s. A CPU profile shows the product page does
+  about the same total work as the configurator (1.39 vs 1.43 s at 4×) but in fewer, longer
+  tasks — hydrating one large client tree (ProductInfo + panel + 12-card related carousel, every
+  `ProductCard` is a client component). New open item in `TODO.md` with the options.
+- **Header logo in the brand navy** (frontend, Richard's call). The logo PNG is a single colour
+  (#006888 teal) on transparency, so no new artwork was needed: `public/globeguard-logo-navy.png`
+  is the same 2048×512 image with every pixel set to #0E1E4B (`--secondary`, the footer and
+  the navy of `GG_Logo_new.JPG` in the WooCommerce logo folder) and the alpha channel untouched
+  (generated with sharp). `GlobeguardBrand` uses it, so header and mobile menu are navy; the
+  footer still turns it white via `brightness-0 invert`. The structured-data logo (`LOGO_PATH`
+  in `lib/seo` and `lib/blog`, the logo Google shows) points at the navy file too (Richard's
+  call); the teal original stays in `public/` as the source. Verified: screenshots of header
+  (1440), menu sheet (390) and footer; next/image serves the navy file in both places.
+  Colour check: footer renders rgb(13,29,73), the served logo rgb(13,30,74) — the same; that the
+  logo looks darker on white is the small-shape-on-white effect. Richard compared it with
+  #0F1E4A (the navy of the old website) side by side — indistinguishable — and kept #0E1E4B.
+
 ## 2026-09-22 (day 2, later)
 
 ### Done
