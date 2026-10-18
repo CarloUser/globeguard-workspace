@@ -9,6 +9,33 @@ rather than editing theirs, and it will merge cleanly. The open items live in `T
 file is the narrative behind them. See MERGE-PLAN.md for the plan and DECISIONS.md for the
 decisions already locked.
 
+## 2026-10-18 — @richard
+
+### Done
+- **Empty band under the navbar removed** (frontend). The header has been `sticky top-0` since
+  the initial import, so it takes its own space in the flow; but 18 content pages still had
+  `pt-32` on `<main id="main-content">`, the offset you need for a `fixed` header. The result was
+  a 128px empty grey band between the nav and the white heading block. Dropped `pt-32` on all 18
+  `<main>`s. `/track-order` is the one page without a heading band of its own (its `pt-32` was
+  the only spacing above the h1), so its container got `pt-10` instead. The home hero's `pt-32`
+  is real padding inside the dark hero and stays.
+
+### How it was verified
+- Rebuilt the frontend image in the local compose stack and measured 23 routes (the 18 page
+  types incl. all 7 legal pages) at 1440px and 390px: `<main>` has no top padding, the first
+  block starts directly under the header, and the nav-to-h1 distance is 40px on most pages (more
+  where a breadcrumb sits above the h1). Screenshots of /produkte/basic, /track-order and
+  /kontakt (mobile) looked right.
+- Nothing used the 128px as an offset: no `scroll-mt`, `scroll-padding` or `scrollIntoView` in `src`.
+- Gates in `node:22-bookworm-slim`: tsc (after `next typegen`), eslint, 115/115 vitest.
+- Not checked live: the blog post page (no posts in the local database); it is the same one-line
+  change as /blog.
+
+### Open
+- Found on the way: the navbar overflows horizontally on phones — new item in `TODO.md` §4.
+- A fresh checkout needs `npx next typegen` before `tsc --noEmit` passes (`PageProps` /
+  `LayoutProps` are generated globals); `next build` does this itself.
+
 ## 2026-09-22 (day 2, later)
 
 ### Done

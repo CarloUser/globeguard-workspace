@@ -190,6 +190,20 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       "Your database schema does not match your current configuration" right after the baseline:
       the entity has `DEFAULT '[]'::jsonb` on `faq_section.items`, the baseline does not. Harmless
       today; a one-line migration makes the baseline match the entities.
+- [x] **Empty band under the navbar on 18 content pages** (Dev). The header is `sticky top-0`
+      (`navbar.tsx`), but every content page's `<main id="main-content">` carries `pt-32`, as if
+      the header were `fixed`. Result: a 128px empty slate band between the nav and the page
+      heading on the tier pages, /produkte, kategorie, kontakt, faq, blog + post, legal pages,
+      support, support/sgw, track-order, partner, warum-globeguard, geraet-finden and
+      unterstuetzte-marken. Fix: drop `pt-32` on those `<main>`s (nothing uses it as a scroll offset).
+      — @richard, 2026-10-18. Dropped `pt-32` on all 18; /track-order has no heading band of its
+      own, so its container got `pt-10` instead. Measured 23 routes at 1440px and 390px: the
+      heading block now starts directly under the nav. Blog post page not checked live (no posts
+      locally) — same one-line change. The home hero's `pt-32` is real hero padding, left as is.
+- [ ] **Navbar overflows horizontally on phones** (Dev). At 390px the utility cluster in row 1 of
+      `navbar.tsx` (language picker, CHF/EUR toggle, cart, login) is ~90px wider than the viewport:
+      the currency toggle and the login link are cut off and the whole page scrolls sideways
+      (`scrollWidth` 465 vs 375). Seen on /kontakt, applies to every page. Found 2026-10-18 (@richard).
 - [ ] **Beta hostname noindex check** after the first beta deploy (the storefront already returns a
       disallow-all robots.txt when the site URL contains `beta.`; the deploy script asserts it).
 
