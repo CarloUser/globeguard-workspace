@@ -24,6 +24,7 @@ Roles: **Owner** = only Carlo can do it (credentials, business facts, legal, mon
 | Person | Item | Since |
 |---|---|---|
 | @richard (+ assistant) | Working through the open Dev items in §4 with visual checks on the local Docker stack; will add a row per item before touching it | 2026-09-26 |
+| @richard (+ assistant) | Publishing the merged shop on `beta.globeguard.ch` (see §1); `driv.beta.globeguard.ch` is not touched | 2026-10-18 |
 
 Related reading: `STATE.md` is the state of the build, `docs/PROGRESS.md` is the narrative log of
 what was done and how it was verified, `docs/DECISIONS.md` holds the decisions already locked
@@ -34,7 +35,7 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
 
 ## 1. Blocked right now (Owner input needed before anything else moves)
 
-- [ ] **Hetzner beta credentials** (Owner). The merged stack cannot be published to
+- [~] **Hetzner beta credentials** (Owner). The merged stack cannot be published to
       `driv.beta.globeguard.ch` without them. Needed: the SSH password for user `drivkf` on
       `dedivirt5332.your-server.de` port 222, and the password of the managed Postgres
       `globeguard_db` on `lqy0.your-database.de`. They were in `hetzner-credentials.md` on the old
@@ -42,6 +43,11 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       konsoleH account login, so the password can be reset there.
       Everything else for the deploy is ready: `deploy/deploy-beta.mjs`, `deploy/beta-checklist.md`
       and the path-aware supervisor are in the backend repo.
+      — @richard, 2026-10-18: the `drivkf` SSH and `globe_db` passwords turned up on Richard's
+      machine and work (SSH and database login checked read-only, nothing changed). They are
+      **not** used for a deploy: the merged shop goes to `beta.globeguard.ch` instead (item below),
+      so Navil's site on `driv.beta.globeguard.ch` and its database stay as they are. Carlo has
+      not answered yet whether `driv.beta` may be overwritten.
 - [ ] **Mollie account and test key** (Owner). Until `MOLLIE_API_KEY` exists, private customers see
       "no payment method available" and the checkout cannot be finished end to end. A test key is
       enough to prove the flow; the live key is a separate item in section 5.
@@ -70,6 +76,33 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       production will be, but destroys the existing beta catalogue and beta orders), or keep the
       data and generate a reviewed catch-up migration. Beta orders are test data, but it is your
       call.
+      — Richard, 2026-10-18: first decided to rebuild, then **superseded**: `globeguard_db` is the
+      database of Navil's site on `driv.beta.globeguard.ch` and stays untouched. The merged shop gets
+      its own new, empty database on `beta.globeguard.ch` (item below), where the baseline migration
+      simply runs; no adoption or catch-up migration needed.
+- [ ] **Publish the merged shop on `beta.globeguard.ch`, leave `driv.beta.globeguard.ch` alone**
+      (@richard, 2026-10-18). `driv.beta` runs Navil's pre-merge site on `globeguard_db`; Carlo has
+      not confirmed it may be overwritten, so the merged shop gets its own place. Checked
+      2026-10-18: `beta.globeguard.ch` already resolves to the same Managed Server (178.105.47.244)
+      but serves nothing yet; the live WordPress on `globeguard.ch` runs there too, under a
+      different account the `drivkf` user cannot even list (separate accounts are what keeps the
+      sites apart); `shop.globeguard.ch` is on another server.
+      Owner steps in konsoleH (Richard): (1) `beta.globeguard.ch` as its **own domain account**
+      with its own user and SSH, like `driv.beta`; (2) Let's Encrypt certificate; (3) a **new**
+      PostgreSQL database with its own user (not `globeguard_db`); (4) Redis for the account if
+      offered; (5) Node.js app: version 24, script `app.js`, working directory `globeguard`, log
+      `globeguard-node.log`, env `PUBLIC_ORIGIN=https://beta.globeguard.ch`, `BACKEND_PORT=3020`,
+      `FRONTEND_PORT=8180` (localhost ports are shared by the whole machine and `driv.beta`
+      already uses 3010/8080). Credentials go into Richard's local credentials file, never git.
+      Dev steps (assistant): storefront rebuilt with `NEXT_PUBLIC_SITE_URL=https://beta.globeguard.ch`
+      (the `beta.` hostname keeps `robots.txt` at `Disallow: /`), `shared/backend.env` with the new
+      origin, database and `PORT=3020`, then `deploy/deploy-beta.mjs` with `BETA_SSH_USER`,
+      `BETA_PUBLIC_ORIGIN=https://beta.globeguard.ch`, `BETA_BACKEND_PORT=3020`,
+      `BETA_FRONTEND_PORT=8180` (no code change: the script and `deploy/app.js` only default to
+      `driv.beta`); seed the catalogue once, import the product images from a local stack
+      (`ASSET_SYNC_SOURCE_API`), reindex, then the checks in `beta-checklist.md` section C.
+      Mail (SendGrid) and Mollie keys are still missing, so registration and online payment
+      cannot be tested there yet.
 
 ---
 
