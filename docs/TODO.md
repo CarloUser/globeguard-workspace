@@ -181,15 +181,17 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
 - [x] **SGW licence Hyundai/Kia + licence images** — @richard, 2026-10-19. New product
       `GG-SGW-LIC-HYUNDAI-KIA` (licence group `hyundaiKia`, model year 2018+ for Hyundai and KIA, same
       four durations and prices as the other SGW licences). Source: «SGW Lizenz» `2018-` added for
-      HYUNDAI and KIA in `C:\GG_Website\GlobeGuard_Markenverwendung.xlsx`; **the master copy on the
-      other laptop / business share still needs the same two cells**, otherwise the next
-      `build:catalog` there drops the licence again. Storefront: picker, configurator (incl. ELITE),
+      HYUNDAI and KIA in `C:\GG_Website\GlobeGuard_Markenverwendung.xlsx` and in the business-share
+      master `08_Marketing\03_Portfolio\GlobeGuard_Markenverwendung.xlsx`. Whoever runs
+      `build:catalog` from an older copy (default path `C:/GlobeGuard/reference/`, which does not
+      exist on Richard's laptop): take the business-share file first, otherwise the licence drops again. Storefront: picker, configurator (incl. ELITE),
       `/support/sgw` and texts know the new group. Images: the four SGW licences and Ferndiagnose
       now have one DE and one EN image each (`SGW-Lizenz_<Marke>_<DE|EN>.jpg`, made from
       `70100_SGW_Stellantis` — DE says «Fahrzeugdiagnose»), in `C:\GG_Website\neue-bilder\GG_Services`;
       the product page shows the image of the page language. `import-product-images.ts` now matches
       licence products by SKU prefix (it never matched their `-DAY` variants before) and expects the
-      files under `GG-SW-Licenses/`. Local DB: seeded once + images uploaded. **Beta: not yet.**
+      files under `GG-SW-Licenses/`. Local DB: seeded once + images uploaded. Beta: release
+      20261019-214740, seeded once (created=1), images uploaded, search finds the licence.
 - [ ] **Marketing claim review** (Owner). All copy was ported from the approved old storefront, but
       a final read of `/warum-globeguard`, the home page and the tier pages is worth it.
 
