@@ -12,6 +12,21 @@ decisions already locked.
 ## 2026-10-19 — @richard
 
 ### Done
+- **FAQ page** (`/faq`): owner FAQ v10.2 imported from `content/faq/faq-de.md` with the new
+  `scripts/import-faq.mjs` (16 chapters, 54 questions, chapter intro lines). Contradictions in the
+  owner document were clarified with Richard first (payment: «Kreditkarte» without provider; shop
+  bills in CHF, EUR display only; delivery times by country; VAT «an der Kasse nach Lieferland»;
+  shipping from Cham or the German warehouse; CH/FL free, Priority with surcharge; INEOS link to the
+  product page). New `components/faq/faq-browser.tsx` and `lib/faq/search.ts` (11 Vitest tests),
+  FAQ item fields `group`/`groupTitle`/`groupIntro`/`slug` in backend, GraphQL and the dashboard
+  editor (carried through on save, not editable there). Local DB only so far.
+- **Shipping rules** CH/LI free with Standard, Priority as surcharge, EU only abroad, business
+  shipping free at home; `destination` checker argument; `shouldRunCheck` cache bug removed;
+  `scripts/update-shipping-methods.mjs` for existing databases (see TODO §3).
+- **Favicon** is now the GG logo of the WordPress site (`favicon.ico` 16/32/48, `icon.png` 192,
+  `apple-icon.png` 180).
+- **INEOS images** (GG-BASIC-CAR-INEOS) replaced, cropped to 3000×2000 like the other devices, set
+  locally and on the beta through the admin API.
 - **Merged shop deployed to `driv.beta.globeguard.ch`** (Carlo agreed that Navil's pre-merge site
   there is overwritten; the `beta.globeguard.ch` plan is parked). Order: old database dumped on the
   host first (261 products, 3 orders), release unpacked and `npm ci` run, schema reset, baseline
@@ -28,6 +43,12 @@ decisions already locked.
   `Disallow: /`, canonical on `driv.beta`. Browser check of `/produkte/basic`, a category, a
   product page and `/track-order`: no console errors, images load. `globeguard.ch` unchanged (200).
 - Not tested: mail and Mollie (no keys), cart/checkout flow.
+- FAQ: frontend gates (tsc, eslint, 126 Vitest tests), axe-core 0 violations in 5 states (desktop,
+  mobile, search, no results, open answer), no horizontal overflow 320–1440 px, deep links scroll
+  below the sticky header, all 54 answers in the SSR HTML (`hidden="until-found"`, so Ctrl+F finds
+  closed answers), FAQPage JSON-LD with 54 questions.
+- Shipping: shop API eligibility checked repeatedly (the cache bug showed only on the second call)
+  for guest, private and company customers with CH, LI, DE, AT addresses, and in the browser checkout.
 
 ### Gotchas
 - `deploy-beta.mjs` cannot upload over SFTP with a scripted password on Windows

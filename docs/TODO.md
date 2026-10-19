@@ -133,7 +133,19 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       empty until locations are entered in the dashboard.
 - [ ] **FAQ and blog content** (Owner content). Both are wired to the backend plugins; the FAQ page
       keys match the route map, so a section published in the dashboard appears immediately.
-- [ ] **Hand over the FAQ texts** (@richard, then Dev). Richard has compiled the FAQs (noted
+- [x] **Website FAQ (German) imported and the `/faq` page rebuilt** — @richard, 2026-10-19. Source is
+      `content/faq/faq-de.md` (copy of the owner's `GlobeGuard_FAQ_DE_v10_2.md`, 16 chapters,
+      54 questions; the internal appendix is skipped). Import: `node scripts/import-faq.mjs --apply`
+      in the backend (dry run without `--apply`, `--publish` to publish; a re-import keeps the
+      published flag). New optional item fields `group`, `groupTitle`, `groupIntro`, `slug` carry
+      chapters, chapter intro lines and deep-link anchors (`/faq#<slug>`). The page has a
+      client-side search (umlaut folding, synonyms, typo tolerance, `?q=`), chapter navigation,
+      copy-link per question and a WhatsApp/e-mail/contact block. Published on Richard's local
+      stack only; **open:** import on the beta (unpublished until Richard approves), English FAQ
+      (`/en/faq` shows the empty state until a `faq-en.md` exists), partner FAQ (protected area, later).
+- [ ] **FAQ texts for the other pages** (@richard, then Dev). The website FAQ is done (item above,
+      its own Markdown format is documented in `import-faq.mjs`); for other page keys the format
+      below still applies. Richard has compiled the FAQs (noted
       2026-10-18) and provides them as a file; a Dev then imports them through the FAQ plugin's
       admin API (upsert per section) instead of typing them into the dashboard. Format, so the
       import can be scripted:
@@ -167,10 +179,17 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
 
 ## 3. Commerce configuration (mostly Owner decisions, small Dev tasks)
 
-- [ ] **Shipping rates** (Owner, B-plan item 3). Live values are placeholders: Swiss Post Priority
-      15.00, Economy 9.00, Geschäftsversand 25.00, EU tracked 35.00, pickup Cham 0.00 (NET CHF).
-      The bootstrap only creates methods that do not exist, so changing them in the dashboard is
-      safe and permanent.
+- [~] **Shipping rates** (Owner, B-plan item 3). — @richard, 2026-10-19: rules decided, amounts partly
+      placeholders. Switzerland/Liechtenstein: «Schweizer Post Standard (kostenlos)» 0.00, Priority
+      (A-Post) = surcharge, placeholder 6.00 (Richard sets the final amount in the dashboard);
+      Geschäftsversand 0.00 at home; EU tracked 35.00 only for foreign addresses; pickup Cham 0.00
+      everywhere (NET CHF). New checker argument `destination` (any/domestic/foreign; no address yet
+      counts as domestic) and a new `destination-shipping-eligibility-checker`. Also fixed: the
+      checkers used `shouldRunCheck`, whose cache is per checker code and session, not per method,
+      so the second checkout call offered EU and Geschäftsversand for a Swiss private customer.
+      The bootstrap only creates missing methods, so **every existing database (each Dev's local
+      one, the beta) needs** `node scripts/update-shipping-methods.mjs --apply` once (dry run without
+      `--apply`; `ADMIN_API=…` for the beta). Open: run it on the beta, final Priority amount.
 - [ ] **EU VAT strategy** (Owner, A7/B). The EU zone exists with a 0 percent placeholder rate. To
       charge EU VAT the backend also needs `AddressBasedTaxZoneStrategy` and one zone per rate.
       Decide OSS (destination country VAT) versus origin, then Dev implements.
