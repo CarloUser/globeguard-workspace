@@ -24,7 +24,7 @@ Roles: **Owner** = only Carlo can do it (credentials, business facts, legal, mon
 | Person | Item | Since |
 |---|---|---|
 | @richard (+ assistant) | Working through the open Dev items in §4 with visual checks on the local Docker stack; will add a row per item before touching it | 2026-09-26 |
-| @richard (+ assistant) | Publishing the merged shop on `beta.globeguard.ch` (see §1); `driv.beta.globeguard.ch` is not touched | 2026-10-18 |
+| @richard (+ assistant) | Merged shop is live on `driv.beta.globeguard.ch` (Carlo agreed to overwrite it, 2026-10-19); finishing the beta checks and the Navil hand-over (see §1) | 2026-10-19 |
 
 Related reading: `STATE.md` is the state of the build, `docs/PROGRESS.md` is the narrative log of
 what was done and how it was verified, `docs/DECISIONS.md` holds the decisions already locked
@@ -80,7 +80,19 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       database of Navil's site on `driv.beta.globeguard.ch` and stays untouched. The merged shop gets
       its own new, empty database on `beta.globeguard.ch` (item below), where the baseline migration
       simply runs; no adoption or catch-up migration needed.
-- [ ] **Publish the merged shop on `beta.globeguard.ch`, leave `driv.beta.globeguard.ch` alone**
+- [~] **Merged shop on the beta — done on `driv.beta.globeguard.ch` (@richard, 2026-10-19)**.
+      Carlo agreed that `driv.beta` is overwritten with the local state, so the plan below
+      (`beta.globeguard.ch`) is parked. Done: old database dumped first (`shared/backups/` on the
+      host; 261 products, 3 orders), schema reset, baseline migration, catalogue seed, 224 product
+      images synced from the local stack, reindex, smoke tests C1–C8, browser check, `robots.txt`
+      `Disallow: /`. The old hand-deployed tree is in `~/globeguard/legacy/`. Still open: tell Navil
+      the site changed; mail (SendGrid) and Mollie cannot be tested until the keys exist; Lighthouse
+      measurement for the performance item; clear up the konsoleH account `GG-Website` (holds
+      `beta.` and `api.globeguard.ch`, nothing running, Carlo to say what it is for). Gotchas:
+      `deploy-beta.mjs` cannot upload over SFTP with a scripted password on Windows (stream over
+      ssh instead); the running supervisor keeps its old `app.js` until it is killed (konsoleH
+      restarts it on the next request); the DB password contains `$`, never `source` the env file.
+- [ ] **(Parked) Publish the merged shop on `beta.globeguard.ch`, leave `driv.beta.globeguard.ch` alone**
       (@richard, 2026-10-18). `driv.beta` runs Navil's pre-merge site on `globeguard_db`; Carlo has
       not confirmed it may be overwritten, so the merged shop gets its own place. Checked
       2026-10-18: `beta.globeguard.ch` already resolves to the same Managed Server (178.105.47.244)
@@ -283,7 +295,7 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       Configurator bundle — @richard, 2026-10-18: measured, not the problem. `/produkte/basic`
       loads 9 KB (gzip) more JS than the home page and has the lowest blocking time of all pages
       (0.6 s at 4× CPU); product pages load +50 KB. See the next item for what is slow instead.
-- [ ] **Product and category pages block the main thread for 1.7–2.2 s on a slow phone** (Dev,
+- [~] **Product and category pages block the main thread for 1.7–2.2 s on a slow phone** (Dev,
       needs a scope call). Clean headless Chrome, 390 px, 4× CPU (what Lighthouse mobile uses),
       median of 5: total blocking time home 0.8 s, configurator 0.6 s, FAQ 1.0 s, category with
       40 cards 1.7 s, product pages 1.7–2.2 s (LCP is fine: 1.9–3.6 s). The product page does no
@@ -297,6 +309,16 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       the global `<Toaster>` (sonner, 13 KB, only product pages toast). Re-measure on the beta
       host with Lighthouse before and after; local numbers include no CDN/compression tuning.
       Richard, 2026-10-18: keep open, measure on the beta server first.
+      Beta measurement (@richard, 2026-10-19, `driv.beta.globeguard.ch`, same clean-Chrome setup:
+      390 px, 4x CPU, 1.6 Mbit/s + 150 ms, cold cache, median of 5; the same run against
+      localhost:3100 for comparison, both from this Windows machine): total blocking time on the
+      beta home 1.1 s, configurator 1.0 s, category 1.1 s, product pages 0.95–1.1 s; localhost in
+      the same session 1.2 / 1.3 / 3.0 / 2.8 / 2.8 s. FCP/LCP on the beta 3.6–5.2 s (home slowest,
+      5.2 s), JS 283–332 KB gzip. So on the beta the product and category pages are not worse
+      than the configurator or home page; the 1.7–2.2 s above does not reproduce there, and the
+      local category/product numbers swing by session (machine load: Docker stack running). Not
+      a Lighthouse run (no CDN or compression tuning is in place on the beta either). Decision
+      (Richard, 2026-10-19: OK) options (a)–(c) stay planned for after go-live; re-measure then.
 - [x] **Search index freshness**: `npm run reindex` (polls the job, exits non-zero if it fails or
       the worker is not running). The seeder and the asset importer already queued one; what did not
       was a direct SQL change, which is exactly what went wrong once already.

@@ -9,6 +9,35 @@ rather than editing theirs, and it will merge cleanly. The open items live in `T
 file is the narrative behind them. See MERGE-PLAN.md for the plan and DECISIONS.md for the
 decisions already locked.
 
+## 2026-10-19 — @richard
+
+### Done
+- **Merged shop deployed to `driv.beta.globeguard.ch`** (Carlo agreed that Navil's pre-merge site
+  there is overwritten; the `beta.globeguard.ch` plan is parked). Order: old database dumped on the
+  host first (261 products, 3 orders), release unpacked and `npm ci` run, schema reset, baseline
+  migration, one-off catalogue seed on a temporary port (260 products, 28 collections), then the
+  symlinks switched. 224 product images synced from the local stack
+  (`ASSET_SYNC_SOURCE_API=http://localhost:3000/shop-api`, target = beta URLs), reindex 272 items.
+- **Beta performance measured** (390 px, 4x CPU, 1.6 Mbit/s, cold cache, median of 5): TBT 0.95–1.1 s
+  on home, configurator, category and product pages; the product/category problem seen locally does
+  not reproduce there. Numbers are in the TODO performance item.
+
+### How it was verified
+- Smoke tests C1–C8 from `deploy/beta-checklist.md`: `/health` ok, 233 products in the shop API,
+  image URL under `/assets/` returns 200 `image/png`, `/` `/en` `/dashboard/` 200, `robots.txt`
+  `Disallow: /`, canonical on `driv.beta`. Browser check of `/produkte/basic`, a category, a
+  product page and `/track-order`: no console errors, images load. `globeguard.ch` unchanged (200).
+- Not tested: mail and Mollie (no keys), cart/checkout flow.
+
+### Gotchas
+- `deploy-beta.mjs` cannot upload over SFTP with a scripted password on Windows
+  (`Permission denied`, SSH on :222 works): tarballs were streamed with `ssh ... 'cat > file'` and
+  the generated remote script was run with a schema-reset and a seed step added before activation.
+- The running supervisor keeps its old `app.js` in memory: kill it and its children, konsoleH
+  restarts it on the next request. Never `pkill -f` a pattern that appears in your own ssh command.
+- The beta DB password contains `$`: read it with grep/sed, never `source` the env file in bash.
+- `hetzner-credentials.md` wraps passwords in backticks; strip them in scripts.
+
 ## 2026-10-18 — @richard
 
 ### Done
