@@ -21,7 +21,8 @@
 # Dev-mailbox caveat: the server runs with APP_ENV=production, which DISABLES the /mailbox dev
 # mailbox; without SENDGRID_API_KEY every e-mail (verification links included) is rendered and
 # discarded, so registration cannot complete. For local flow tests set APP_ENV=development in .env
-# (mailbox at http://localhost:3000/mailbox) or provide a SendGrid key.
+# (mailbox at http://localhost:3000/mailbox; server and worker share the backend_test_emails
+# volume for it) or provide a SendGrid key.
 #
 # Other notes
 # - NEXT_PUBLIC_* values are baked into the frontend image at build time (build args below):
@@ -128,6 +129,9 @@ services:
       - "3000:3000"
     volumes:
       - backend_assets:/app/static/assets
+      # Dev mailbox (APP_ENV=development): the worker writes the mails, the server serves
+      # /mailbox, so both need the same folder.
+      - backend_test_emails:/app/static/email/test-emails
     depends_on:
       postgres:
         condition: service_healthy
@@ -158,6 +162,7 @@ services:
       SEED_CATALOG: "false"
     volumes:
       - backend_assets:/app/static/assets
+      - backend_test_emails:/app/static/email/test-emails
     depends_on:
       server:
         condition: service_healthy
@@ -207,3 +212,4 @@ volumes:
   postgres_data:
   redis_data:
   backend_assets:
+  backend_test_emails:

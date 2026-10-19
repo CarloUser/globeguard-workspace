@@ -85,7 +85,11 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       (`beta.globeguard.ch`) is parked. Done: old database dumped first (`shared/backups/` on the
       host; 261 products, 3 orders), schema reset, baseline migration, catalogue seed, 224 product
       images synced from the local stack, reindex, smoke tests C1–C8, browser check, `robots.txt`
-      `Disallow: /`. The old hand-deployed tree is in `~/globeguard/legacy/`. Still open: tell Navil
+      `Disallow: /`. The old hand-deployed tree is in `~/globeguard/legacy/`. Update 2026-10-19
+      evening: release `20261019-181743` (backend ea9e2be, frontend dcac334: FAQ page, shipping
+      rules, favicon) deployed without schema reset (dump first, no pending migrations), builds
+      taken from the Linux Docker images (so the Windows dashboard-translation gap does not apply;
+      not separately checked). Still open: tell Navil
       the site changed; mail (SendGrid) and Mollie cannot be tested until the keys exist; Lighthouse
       measurement for the performance item; clear up the konsoleH account `GG-Website` (holds
       `beta.` and `api.globeguard.ch`, nothing running, Carlo to say what it is for). Gotchas:
@@ -140,9 +144,11 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       published flag). New optional item fields `group`, `groupTitle`, `groupIntro`, `slug` carry
       chapters, chapter intro lines and deep-link anchors (`/faq#<slug>`). The page has a
       client-side search (umlaut folding, synonyms, typo tolerance, `?q=`), chapter navigation,
-      copy-link per question and a WhatsApp/e-mail/contact block. Published on Richard's local
-      stack only; **open:** import on the beta (unpublished until Richard approves), English FAQ
-      (`/en/faq` shows the empty state until a `faq-en.md` exists), partner FAQ (protected area, later).
+      copy-link per question and a WhatsApp/e-mail/contact block. Imported and published on the
+      beta 2026-10-19 (release `20261019-181743`) so Richard can test it there; **open:** Richard's
+      test and OK of the content, English FAQ (`/en/faq` shows the empty state until a
+      `faq-en.md` exists), partner FAQ (protected area, later). After each new FAQ version: re-run
+      the import locally and with `ADMIN_API=https://driv.beta.globeguard.ch/admin-api` for the beta.
 - [ ] **FAQ texts for the other pages** (@richard, then Dev). The website FAQ is done (item above,
       its own Markdown format is documented in `import-faq.mjs`); for other page keys the format
       below still applies. Richard has compiled the FAQs (noted
@@ -172,6 +178,18 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
 - [ ] **Product photography and the V110 price sheet** (Owner). Current images came from the beta
       shop. The originals and the current price master are on the other laptop; the catalogue build
       script reads them from `C:/GlobeGuard/reference/`.
+- [x] **SGW licence Hyundai/Kia + licence images** — @richard, 2026-10-19. New product
+      `GG-SGW-LIC-HYUNDAI-KIA` (licence group `hyundaiKia`, model year 2018+ for Hyundai and KIA, same
+      four durations and prices as the other SGW licences). Source: «SGW Lizenz» `2018-` added for
+      HYUNDAI and KIA in `C:\GG_Website\GlobeGuard_Markenverwendung.xlsx`; **the master copy on the
+      other laptop / business share still needs the same two cells**, otherwise the next
+      `build:catalog` there drops the licence again. Storefront: picker, configurator (incl. ELITE),
+      `/support/sgw` and texts know the new group. Images: the four SGW licences and Ferndiagnose
+      now have one DE and one EN image each (`SGW-Lizenz_<Marke>_<DE|EN>.jpg`, made from
+      `70100_SGW_Stellantis` — DE says «Fahrzeugdiagnose»), in `C:\GG_Website\neue-bilder\GG_Services`;
+      the product page shows the image of the page language. `import-product-images.ts` now matches
+      licence products by SKU prefix (it never matched their `-DAY` variants before) and expects the
+      files under `GG-SW-Licenses/`. Local DB: seeded once + images uploaded. **Beta: not yet.**
 - [ ] **Marketing claim review** (Owner). All copy was ported from the approved old storefront, but
       a final read of `/warum-globeguard`, the home page and the tier pages is worth it.
 
@@ -189,7 +207,10 @@ The open pre-go-live questions from the merge plan keep their B-numbers here.
       so the second checkout call offered EU and Geschäftsversand for a Swiss private customer.
       The bootstrap only creates missing methods, so **every existing database (each Dev's local
       one, the beta) needs** `node scripts/update-shipping-methods.mjs --apply` once (dry run without
-      `--apply`; `ADMIN_API=…` for the beta). Open: run it on the beta, final Priority amount.
+      `--apply`; `ADMIN_API=…` for the beta). Done on Richard's local DB and on the beta
+      (2026-10-19, checked per country CH/LI/DE/AT, twice in a row). **Not finished:** final
+      Priority surcharge (placeholder 6.00, Richard sets it in the dashboard), EU tracked 35.00 is
+      still a placeholder, other Devs' local databases still need the script once.
 - [ ] **EU VAT strategy** (Owner, A7/B). The EU zone exists with a 0 percent placeholder rate. To
       charge EU VAT the backend also needs `AddressBasedTaxZoneStrategy` and one zone per rate.
       Decide OSS (destination country VAT) versus origin, then Dev implements.
